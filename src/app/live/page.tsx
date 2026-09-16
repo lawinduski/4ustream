@@ -1,0 +1,14 @@
+'use client';
+import { Suspense, useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import { Search, Radio, ShieldAlert } from 'lucide-react';
+import { PageShell } from '@/components/PageShell';
+import { Protected } from '@/components/Protected';
+import { ChannelCard } from '@/components/ChannelCard';
+import { getChannels } from '@/lib/content';
+import type { Channel } from '@/lib/types';
+import { useApp } from '@/components/AppProvider';
+import { StreamPlayer } from '@/components/StreamPlayer';
+function LiveInner(){const {t}=useApp();const params=useSearchParams();const selectedId=params.get('channel');const [channels,setChannels]=useState<Channel[]>([]);const [q,setQ]=useState('');const [cat,setCat]=useState('ALL');useEffect(()=>{getChannels().then(setChannels).catch(()=>{});},[]);const selected=channels.find(c=>c.id===selectedId);const list=useMemo(()=>channels.filter(c=>(cat==='ALL'||c.category===cat)&&c.name.toLowerCase().includes(q.toLowerCase())&&(c.enabled||selectedId===c.id)),[channels,q,cat,selectedId]);return <PageShell><Protected><div className="space-y-7"><div><div className="flex items-center gap-2 text-violet-300 text-sm font-bold"><Radio size={17}/> 4uStream Live</div><h1 className="text-3xl sm:text-4xl font-black mt-2">{t('live')}</h1></div><div className="flex flex-col sm:flex-row gap-3"><div className="relative flex-1"><Search className="absolute start-3 top-1/2 -translate-y-1/2 text-slate-500" size={18}/><input value={q} onChange={e=>setQ(e.target.value)} placeholder={t('search')} className="w-full glass rounded-xl py-3 ps-10 pe-4 outline-none focus:ring-2 focus:ring-violet-500/40"/></div><select value={cat} onChange={e=>setCat(e.target.value)} className="glass rounded-xl px-4 py-3 outline-none">{['ALL','NEWS','SPORTS','BEIN','MOVIES','KIDS','KURDISH','ENTERTAINMENT'].map(x=><option key={x}>{x}</option>)}</select></div>{selected&&<section className="glass rounded-3xl overflow-hidden"><StreamPlayer url={selected.streamUrl} title={selected.name} playerType={selected.playerType}/><div className="p-5"><div className="text-xs text-violet-300 font-bold">{selected.category}</div><h2 className="text-xl font-black mt-1">{selected.name}</h2><p className="text-sm text-slate-400 mt-2">{selected.description}</p></div></section>}{!selected&&<div className="glass rounded-2xl p-5 text-sm text-slate-400 flex items-center gap-3"><ShieldAlert size={18} className="text-amber-300"/>Choose a channel to start watching.</div>}<div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">{list.map(c=><ChannelCard key={c.id} channel={c}/>)}</div>{!list.length&&<div className="text-center py-20 text-slate-500">{t('noResults')}</div>}</div></Protected></PageShell>}
+
+export default function Live(){return <Suspense fallback={<PageShell><div className="min-h-[60vh] grid place-items-center text-slate-400">Loading…</div></PageShell>}><LiveInner/></Suspense>}

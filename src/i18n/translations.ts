@@ -1,0 +1,18 @@
+export type Lang = 'badini' | 'sorani' | 'en' | 'ar';
+
+export const translations = {
+  badini: {
+    home: 'سەرەکی', live: 'کەنالێن ڕاستەوخۆ', sports: 'وەرزش', news: 'نەخۆش', films: 'فلم', drama: 'دراما', favorites: 'دڵخواز', account: 'هەژمار', admin: 'بەڕێڤەبر', login: 'چوونەژوور', signup: 'هەژمار دروست بکە', logout: 'دەرکەفتن', search: 'لێگەریان...', active: 'چالاک', pending: 'چاوەڕێ', disabled: 'ناچالاک', activate: 'چالاک بکە', disable: 'ناچالاک بکە', welcome: 'بەخێرهاتی بۆ 4uStream', subtitle: 'پلاتفۆرمەکەی تۆ بۆ TV، فلم و دراما', noAccess: 'هەژمارەکەت هێشتا چالاک نەکراوە.', all: 'هەمی', light: 'ڕوون', dark: 'تاریک', settings: 'ڕێکخستن', install: 'زیادکردن بۆ Home Screen', recently: 'دوا بینراوەکان', noResults: 'هیچ ئەنجامێک نەدۆزرایەوە', watch: 'بینین'
+  },
+  sorani: {
+    home: 'سەرەکی', live: 'کەناڵەکان', sports: 'وەرزش', news: 'هەواڵ', films: 'فیلم', drama: 'دراما', favorites: 'دڵخوازەکان', account: 'هەژمار', admin: 'بەڕێوەبەر', login: 'چوونەژوورەوە', signup: 'دروستکردنی هەژمار', logout: 'چوونەدەرەوە', search: 'گەڕان...', active: 'چالاک', pending: 'چاوەڕوان', disabled: 'ناچالاک', activate: 'چالاککردن', disable: 'ناچالاککردن', welcome: 'بەخێربێیت بۆ 4uStream', subtitle: 'پلاتفۆرمەکەت بۆ TV، فیلم و دراما', noAccess: 'هەژمارەکەت هێشتا چالاک نەکراوە.', all: 'هەموو', light: 'ڕوون', dark: 'تاریک', settings: 'ڕێکخستنەکان', install: 'زیادکردن بۆ سکرینی سەرەکی', recently: 'دواین بینراوەکان', noResults: 'هیچ ئەنجامێک نەدۆزرایەوە', watch: 'بینین'
+  },
+  en: {
+    home: 'Home', live: 'Live TV', sports: 'Sports', news: 'News', films: 'Films', drama: 'Drama', favorites: 'Favorites', account: 'Account', admin: 'Admin', login: 'Login', signup: 'Create account', logout: 'Logout', search: 'Search...', active: 'Active', pending: 'Pending', disabled: 'Disabled', activate: 'Activate', disable: 'Disable', welcome: 'Welcome to 4uStream', subtitle: 'Your modern home for live TV, films and drama', noAccess: 'Your account is waiting for activation.', all: 'All', light: 'Light', dark: 'Dark', settings: 'Settings', install: 'Add to Home Screen', recently: 'Recently watched', noResults: 'No results found', watch: 'Watch'
+  },
+  ar: {
+    home: 'الرئيسية', live: 'البث المباشر', sports: 'رياضة', news: 'أخبار', films: 'أفلام', drama: 'دراما', favorites: 'المفضلة', account: 'الحساب', admin: 'الإدارة', login: 'تسجيل الدخول', signup: 'إنشاء حساب', logout: 'تسجيل الخروج', search: 'بحث...', active: 'نشط', pending: 'قيد الانتظار', disabled: 'معطل', activate: 'تفعيل', disable: 'تعطيل', welcome: 'مرحباً بك في 4uStream', subtitle: 'منصتك الحديثة للبث المباشر والأفلام والدراما', noAccess: 'حسابك بانتظار التفعيل.', all: 'الكل', light: 'فاتح', dark: 'داكن', settings: 'الإعدادات', install: 'إضافة إلى الشاشة الرئيسية', recently: 'شوهد مؤخراً', noResults: 'لم يتم العثور على نتائج', watch: 'مشاهدة'
+  }
+} as const;
+
+export type TKey = keyof typeof translations.en;
