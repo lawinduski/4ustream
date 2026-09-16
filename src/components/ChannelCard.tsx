@@ -1,17 +1,14 @@
 'use client';
 import Link from 'next/link';
-import { Play, Star, Radio } from 'lucide-react';
+import { Play, Star } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import type { Channel } from '@/lib/types';
+import { readLocalFavorites, toggleFavorite } from '@/lib/favorites';
+import { useApp } from './AppProvider';
 export function ChannelCard({channel}:{channel:Channel}){
- const fav=()=>{const k='4u-favorites';const a=JSON.parse(localStorage.getItem(k)||'[]');const n=a.includes(channel.id)?a.filter((x:string)=>x!==channel.id):[...a,channel.id];localStorage.setItem(k,JSON.stringify(n));};
- return <article className="channel-card group">
-   <div className="channel-media">
-    {channel.logo?<img src={channel.logo} alt="" loading="lazy" decoding="async" className="channel-logo"/>:<div className="channel-fallback"><Radio size={30}/><b>{channel.name.slice(0,2).toUpperCase()}</b></div>}
-    <div className="channel-shade"/>
-    <div className="live-pill"><span/>LIVE</div>
-    <button onClick={fav} className="favorite-btn" aria-label="Favorite"><Star size={16}/></button>
-    <Link href={`/live?channel=${encodeURIComponent(channel.id)}`} className="play-overlay"><span><Play size={19} fill="currentColor"/></span></Link>
-    <div className="channel-caption"><span>{channel.category}</span><h3>{channel.name}</h3></div>
-   </div>
- </article>
+ const {user}=useApp(); const [fav,setFav]=useState(false);
+ useEffect(()=>{setFav(readLocalFavorites().some(x=>x.id===channel.id&&x.type==='channel')); const fn=()=>setFav(readLocalFavorites().some(x=>x.id===channel.id&&x.type==='channel')); window.addEventListener('4u-favorites-changed',fn); return()=>window.removeEventListener('4u-favorites-changed',fn)},[channel.id]);
+ useEffect(()=>{if(!user)return; import('@/lib/favorites').then(({getFavorites})=>getFavorites(user.uid).then(a=>setFav(a.some(x=>x.id===channel.id&&x.type==='channel'))).catch(()=>{}));},[user,channel.id]);
+ const favClick=async(e:React.MouseEvent)=>{e.preventDefault();e.stopPropagation(); const next=await toggleFavorite(user?.uid,{id:channel.id,type:'channel',title:channel.name,image:channel.logo});setFav(next)};
+ return <div className="glass card-hover rounded-2xl overflow-hidden group relative"><div className="channel-art aspect-[16/10] bg-gradient-to-br from-slate-900 to-slate-800"><div className="absolute inset-0 grid place-items-center">{channel.logo?<img src={channel.logo} alt={channel.name} loading="lazy" decoding="async" className="w-full h-full object-cover"/>:<div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 grid place-items-center"><span className="font-black text-lg text-slate-300">{channel.name.slice(0,2).toUpperCase()}</span></div>}</div><button onClick={favClick} className={`absolute top-3 end-3 p-2 rounded-xl bg-black/45 backdrop-blur text-slate-300 hover:text-yellow-300 z-10 ${fav?'text-yellow-300':''}`} aria-label="Favorite"><Star size={16} fill={fav?'currentColor':'none'}/></button><Link href={`/live?channel=${encodeURIComponent(channel.id)}`} className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition bg-black/35"><span className="h-12 w-12 rounded-full bg-white text-slate-900 grid place-items-center shadow-xl"><Play size={19} fill="currentColor"/></span></Link></div><div className="p-3 sm:p-4"><div className="text-[10px] uppercase tracking-[.18em] text-violet-300 font-bold">{channel.category}</div><h3 className="font-bold mt-1 truncate">{channel.name}</h3><p className="text-xs text-slate-400 mt-1">Ready to watch</p></div></div>
 }

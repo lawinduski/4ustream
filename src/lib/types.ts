@@ -33,3 +33,23 @@ export type UserProfile = {
   status: UserStatus;
   createdAt?: unknown;
 };
+
+export type Favorite = {
+  id: string;
+  type: 'channel' | 'media';
+  title: string;
+  image?: string;
+  createdAt?: unknown;
+};
+
+export type AdBanner = {
+  id: string;
+  title: string;
+  image: string;
+  mobileImage?: string;
+  link: string;
+  enabled: boolean;
+  order: number;
+  createdAt?: unknown;
+  updatedAt?: unknown;
+};

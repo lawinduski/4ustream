@@ -18,31 +18,27 @@ service cloud.firestore {
       allow read: if isOwner(uid);
       allow write: if false;
     }
-
     match /users/{uid} {
-      allow create: if isOwner(uid)
-        && request.resource.data.uid == uid
-        && request.resource.data.status == 'pending'
-        && request.resource.data.email == request.auth.token.email;
+      allow create: if isOwner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'pending' && request.resource.data.email == request.auth.token.email;
       allow read: if isOwner(uid) || isAdmin();
-      allow update: if isAdmin()
-        || (isOwner(uid)
-          && request.resource.data.uid == resource.data.uid
-          && request.resource.data.email == resource.data.email
-          && request.resource.data.status == resource.data.status);
+      allow update: if isAdmin() || (isOwner(uid) && request.resource.data.uid == resource.data.uid && request.resource.data.email == resource.data.email && request.resource.data.status == resource.data.status);
       allow delete: if isAdmin();
     }
-
+    match /users/{uid}/favorites/{favoriteId} {
+      allow read, create, update, delete: if isOwner(uid);
+    }
     match /channels/{id} {
       allow read: if isAdmin() || (activeUser() && resource.data.enabled == true);
       allow write: if isAdmin();
     }
-
     match /media/{id} {
       allow read: if isAdmin() || (activeUser() && resource.data.enabled == true);
       allow write: if isAdmin();
     }
-
+    match /ads/{id} {
+      allow read: if isAdmin() || (resource.data.enabled == true);
+      allow write: if isAdmin();
+    }
     match /{document=**} { allow read, write: if false; }
   }
 }

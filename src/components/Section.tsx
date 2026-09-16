@@ -1,2 +1,2 @@
 import Link from 'next/link';
-export function Section({title,href,children}:{title:string;href?:string;children:React.ReactNode}){return <section className="space-y-4"><div className="section-head"><div><span className="section-dot"/><h2>{title}</h2></div>{href&&<Link href={href}>View all <span>›</span></Link>}</div>{children}</section>}
+export function Section({title,href,children}:{title:string;href?:string;children:React.ReactNode}){return <section className="space-y-5"><div className="flex items-end justify-between"><h2 className="text-xl sm:text-2xl font-extrabold tracking-tight">{title}</h2>{href&&<Link href={href} className="text-xs text-violet-300 hover:text-violet-200">View all</Link>}</div>{children}</section>}
