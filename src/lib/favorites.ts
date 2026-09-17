@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, setDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import type { Favorite } from '@/lib/types';
 
@@ -30,8 +30,8 @@ export async function toggleFavorite(uid: string | undefined, value: Favorite): 
   if (!uid) return localFavorite(value.id, value);
   const key = `${value.type}-${value.id}`;
   const ref = doc(db, 'users', uid, 'favorites', key);
-  const current = await getDoc(ref);
-  const exists = current.exists();
+  const current = await getDocs(collection(db, 'users', uid, 'favorites'));
+  const exists = current.docs.some(d => d.id === key);
   if (exists) await deleteDoc(ref);
   else await setDoc(ref, { ...value, createdAt: serverTimestamp() });
   window.dispatchEvent(new Event('4u-favorites-changed'));
