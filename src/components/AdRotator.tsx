@@ -1,28 +1,16 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { X, ExternalLink, Megaphone } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { X, ExternalLink, Megaphone, ChevronLeft } from 'lucide-react';
 import type { AdBanner } from '@/lib/types';
 
 export function AdRotator({ ads }: { ads: AdBanner[] }) {
-  const [index,setIndex]=useState(0); const [overlay,setOverlay]=useState(false); const [overlayIndex,setOverlayIndex]=useState(0);
-  useEffect(()=>{ if(ads.length<2)return; const id=window.setInterval(()=>setIndex(i=>(i+1)%ads.length),5000); return()=>window.clearInterval(id)},[ads.length]);
-  useEffect(()=>{ if(!ads.length)return; const id=window.setInterval(()=>{setOverlayIndex(i=>(i+1)%ads.length);setOverlay(true)},20000); return()=>window.clearInterval(id)},[ads.length]);
-  if(!ads.length)return null;
-  const ad=ads[index]; const pop=ads[overlayIndex];
-  return <>
-    <section className="ad-shell relative overflow-hidden rounded-3xl border border-white/10 bg-black/20 shadow-xl">
-      <a href={ad.link} target="_blank" rel="noopener noreferrer" className="block group">
-        <picture><source media="(max-width: 640px)" srcSet={ad.mobileImage||ad.image}/><img src={ad.image} alt={ad.title} loading="eager" decoding="async" className="w-full h-[120px] sm:h-[170px] lg:h-[210px] object-cover transition duration-500 group-hover:scale-[1.015]"/></picture>
-        <div className="absolute bottom-3 start-3 inline-flex items-center gap-1.5 rounded-full bg-black/60 backdrop-blur px-3 py-1.5 text-[11px] font-bold"><Megaphone size={13}/>{ad.title}</div>
-      </a>
-      <div className="absolute top-3 end-3 rounded-full bg-black/55 backdrop-blur px-2.5 py-1 text-[10px] text-white/80">{index+1}/{ads.length}</div>
-    </section>
-    {overlay&&<div className="fixed inset-0 z-[80] grid place-items-center bg-black/65 backdrop-blur-sm p-4" role="dialog" aria-modal="true">
-      <div className="relative w-full max-w-3xl rounded-3xl overflow-hidden border border-white/15 shadow-2xl bg-slate-950">
-        <button onClick={()=>setOverlay(false)} className="absolute top-3 end-3 z-10 h-9 w-9 rounded-full bg-black/65 grid place-items-center text-white"><X size={18}/></button>
-        <a href={pop.link} target="_blank" rel="noopener noreferrer" onClick={()=>setOverlay(false)} className="block"><picture><source media="(max-width: 640px)" srcSet={pop.mobileImage||pop.image}/><img src={pop.image} alt={pop.title} className="w-full max-h-[75vh] object-contain bg-black"/></picture></a>
-        <div className="p-3 flex items-center justify-between gap-3"><span className="font-bold truncate">{pop.title}</span><a href={pop.link} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-slate-950 text-xs font-black"><ExternalLink size={14}/> Open</a></div>
-      </div>
-    </div>}
-  </>
+ const banners=useMemo(()=>ads.filter(a=>(a.placement||'banner')==='banner'),[ads]);
+ const popups=useMemo(()=>ads.filter(a=>(a.placement||'banner')==='popup'),[ads]);
+ const [index,setIndex]=useState(0); const [popupIndex,setPopupIndex]=useState(0); const [open,setOpen]=useState(false);
+ useEffect(()=>{if(banners.length<2)return;const id=window.setInterval(()=>setIndex(i=>(i+1)%banners.length),5000);return()=>window.clearInterval(id)},[banners.length]);
+ useEffect(()=>{if(!popups.length)return;const id=window.setInterval(()=>{setPopupIndex(i=>(i+1)%popups.length);setOpen(true)},20000);return()=>window.clearInterval(id)},[popups.length]);
+ if(!banners.length&&!popups.length)return null; const ad=banners[index]; const pop=popups[popupIndex];
+ return <>{ad&&<section className="ad-shell relative overflow-hidden rounded-[1.8rem] border border-white/10 shadow-2xl"><a href={ad.link||'#'} target={ad.link?'_blank':undefined} rel="noopener noreferrer" className="block group"><picture><source media="(max-width: 640px)" srcSet={ad.mobileImage||ad.image}/><img src={ad.image} alt={ad.title} loading="eager" decoding="async" className="w-full h-[125px] sm:h-[180px] lg:h-[220px] object-cover transition duration-700 group-hover:scale-[1.02]"/></picture><div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none"/><div className="absolute bottom-3 start-3 inline-flex items-center gap-2 rounded-full bg-black/55 backdrop-blur-xl border border-white/10 px-3 py-1.5 text-[11px] font-bold"><Megaphone size={13}/>{ad.title}</div><div className="absolute bottom-3 end-3 inline-flex items-center gap-1 rounded-full bg-white/10 backdrop-blur-xl px-3 py-1.5 text-[10px]">Open <ChevronLeft size={13}/></div></a>{banners.length>1&&<div className="absolute top-3 end-3 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 px-2.5 py-1 text-[10px]">{index+1}/{banners.length}</div>}</section>}
+ {pop&&open&&<div className="fixed inset-0 z-[100] grid place-items-center bg-black/70 backdrop-blur-md p-4" role="dialog" aria-modal="true"><div className="relative w-full max-w-3xl overflow-hidden rounded-[2rem] border border-white/15 bg-slate-950 shadow-[0_30px_120px_rgba(0,0,0,.6)]"><button onClick={()=>setOpen(false)} aria-label="Close" className="absolute top-3 end-3 z-10 h-10 w-10 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 grid place-items-center"><X size={18}/></button><a href={pop.link||'#'} target={pop.link?'_blank':undefined} rel="noopener noreferrer" onClick={()=>setOpen(false)}><picture><source media="(max-width: 640px)" srcSet={pop.mobileImage||pop.image}/><img src={pop.image} alt={pop.title} className="w-full max-h-[72vh] object-contain bg-black"/></picture></a><div className="p-4 flex items-center justify-between gap-3"><div className="font-bold truncate">{pop.title}</div>{pop.link&&<a href={pop.link} target="_blank" rel="noopener noreferrer" className="shrink-0 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-slate-950 text-xs font-black"><ExternalLink size={14}/>Open</a>}</div></div></div>}
+ </>
 }

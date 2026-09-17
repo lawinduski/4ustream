@@ -1,47 +1,37 @@
 'use client';
 import Link from 'next/link';
-import { ArrowRight, PlayCircle, ShieldCheck, Languages, Smartphone, Sparkles } from 'lucide-react';
+import { ArrowUpLeft, Play, ShieldCheck, Smartphone, Sparkles, Crown, Radio, Film, Clapperboard, ChevronLeft, Zap } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { PageShell } from '@/components/PageShell';
-import { Section } from '@/components/Section';
 import { ChannelCard } from '@/components/ChannelCard';
 import { MediaCard } from '@/components/MediaCard';
 import { getChannels, getMedia } from '@/lib/content';
 import { getAds } from '@/lib/ads';
 import { AdRotator } from '@/components/AdRotator';
-import type { AdBanner } from '@/lib/types';
-import type { Channel, MediaItem } from '@/lib/types';
+import type { AdBanner, Channel, MediaItem } from '@/lib/types';
 import { useApp } from '@/components/AppProvider';
 
 export default function Home(){
-  const {t}=useApp();
-  const [channels,setChannels]=useState<Channel[]>([]);
-  const [media,setMedia]=useState<MediaItem[]>([]);
-  const [ads,setAds]=useState<AdBanner[]>([]);
-
-  useEffect(()=>{
-    Promise.all([getChannels(true), getMedia(true), getAds(true)])
-      .then(([cs,ms,as])=>{setChannels(cs);setMedia(ms);setAds(as);})
-      .catch(()=>{setChannels([]);setMedia([]);setAds([]);});
-  },[]);
-
-  const films=media.filter(x=>x.type==='film');
-
-  return <PageShell><div className="fade-up space-y-14">
-    {ads.length>0&&<AdRotator ads={ads}/>}
-    <section className="relative overflow-hidden rounded-[2rem] glass p-7 sm:p-12">
-      <div className="max-w-3xl">
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-violet-500/10 border border-violet-400/20 text-violet-200 text-xs font-bold"><Sparkles size={14}/> 4uStream</div>
-        <h1 className="text-4xl sm:text-6xl font-black tracking-tight mt-6 leading-[1.05]">{t('welcome')}</h1>
-        <p className="text-slate-400 mt-5 text-base sm:text-lg max-w-2xl">{t('subtitle')}</p>
-        <div className="flex flex-wrap gap-3 mt-8"><Link href="/live" className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-white text-slate-950 font-extrabold hover:bg-slate-200"><PlayCircle size={18}/>{t('live')}<ArrowRight size={17}/></Link><Link href="/signup" className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 font-bold hover:bg-white/10">{t('signup')}</Link></div>
-      </div>
-      <div className="hidden lg:grid absolute end-10 top-10 w-64 h-64 rounded-full bg-gradient-to-br from-violet-500/30 to-cyan-400/10 blur-2xl"/>
-    </section>
-    <section className="grid sm:grid-cols-3 gap-4"><Feature icon={<ShieldCheck/>} title="Security-first" text="Authentication, authorization and locked database rules."/><Feature icon={<Languages/>} title="4 languages" text="Badini, Sorani, English and Arabic with RTL/LTR."/><Feature icon={<Smartphone/>} title="Installable" text="PWA-ready experience for mobile and desktop."/></section>
-    {channels.length>0&&<Section title={t('live')} href="/live"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{channels.slice(0,8).map(c=><ChannelCard key={c.id} channel={c}/>)}</div></Section>}
-    {films.length>0&&<Section title={t('films')} href="/films"><div className="grid grid-cols-2 sm:grid-cols-4 gap-4">{films.slice(0,8).map(x=><MediaCard key={x.id} item={x}/>)}</div></Section>}
-  </div></PageShell>
+ const {t,isVip,user}=useApp(); const [channels,setChannels]=useState<Channel[]>([]); const [media,setMedia]=useState<MediaItem[]>([]); const [ads,setAds]=useState<AdBanner[]>([]);
+ useEffect(()=>{Promise.all([getChannels(true,isVip),getMedia(true,isVip),getAds(true)]).then(([cs,ms,as])=>{setChannels(cs);setMedia(ms);setAds(as);}).catch(()=>{});},[isVip]);
+ const films=media.filter(x=>x.type==='film'); const dramas=media.filter(x=>x.type==='drama');
+ return <PageShell><div className="home-stage fade-up">
+  {ads.length>0&&<AdRotator ads={ads}/>} 
+  <section className="hero-premium">
+   <div className="hero-grid"/><div className="hero-glow hero-glow-a"/><div className="hero-glow hero-glow-b"/>
+   <div className="relative z-10 max-w-3xl">
+    <div className="eyebrow"><span className="live-dot"/> 4uStream • BADINI FIRST</div>
+    <h1 className="hero-title">{t('welcome')}</h1>
+    <p className="hero-copy">{t('subtitle')}</p>
+    <div className="flex flex-wrap gap-3 mt-8"><Link href="/live" className="primary-cta"><Play size={17} fill="currentColor"/>{t('live')}<ArrowUpLeft size={17}/></Link><Link href={user?'/account':'/signup'} className="secondary-cta">{user?(isVip?'VIP MEMBER':'FREE ACCOUNT'):t('signup')}<Crown size={16}/></Link></div>
+    <div className="hero-metrics"><span><Zap size={14}/> Fast UI</span><span><ShieldCheck size={14}/> Secure access</span><span><Smartphone size={14}/> PWA</span></div>
+   </div>
+  </section>
+  <div className="quick-grid"><Quick href="/live" icon={<Radio/>} title={t('live')} text="Live channels"/><Quick href="/films" icon={<Film/>} title={t('films')} text="Free & VIP films"/><Quick href="/drama" icon={<Clapperboard/>} title={t('drama')} text="Seasons & episodes"/><Quick href="/account" icon={<Crown/>} title="VIP" text={isVip?'Your VIP is active':'Explore VIP'}/></div>
+  {channels.length>0&&<PremiumSection title={t('live')} href="/live"><div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">{channels.slice(0,8).map(c=><ChannelCard key={c.id} channel={c}/>)}</div></PremiumSection>}
+  {films.length>0&&<PremiumSection title={t('films')} href="/films"><div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">{films.slice(0,10).map(x=><MediaCard key={x.id} item={x}/>)}</div></PremiumSection>}
+  {dramas.length>0&&<PremiumSection title={t('drama')} href="/drama"><div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4">{dramas.slice(0,10).map(x=><MediaCard key={x.id} item={x}/>)}</div></PremiumSection>}
+ </div></PageShell>
 }
-
-function Feature({icon,title,text}:{icon:React.ReactNode;title:string;text:string}){return <div className="glass rounded-2xl p-5"><div className="h-10 w-10 rounded-xl bg-white/5 grid place-items-center text-violet-300">{icon}</div><h3 className="font-bold mt-4">{title}</h3><p className="text-sm text-slate-400 mt-1">{text}</p></div>}
+function Quick({href,icon,title,text}:{href:string;icon:React.ReactNode;title:string;text:string}){return <Link href={href} className="quick-card"><div className="quick-icon">{icon}</div><div><b>{title}</b><small>{text}</small></div><ChevronLeft size={16} className="ms-auto opacity-40"/></Link>}
+function PremiumSection({title,href,children}:{title:string;href:string;children:React.ReactNode}){return <section className="premium-section"><div className="section-heading"><div><div className="section-kicker">4uSTREAM</div><h2>{title}</h2></div><Link href={href}>View all <ChevronLeft size={15}/></Link></div>{children}</section>}

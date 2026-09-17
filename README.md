@@ -38,3 +38,12 @@ npm run dev
 ## Production
 
 Set the same environment variables in Vercel, deploy the repository, and publish the Firestore rules from `firestore.rules` with the Firebase CLI. The project has not been build-tested in this environment because dependency installation was unavailable.
+
+
+## V5 UI / Media Studio updates
+- Premium glass home hero, quick actions, animated background and icon navigation.
+- Admin can upload logos, posters and ad images from the laptop through Firebase Storage.
+- Ads support banner, popup and inline placement.
+- Free/VIP controls remain managed in Firestore.
+- Deploy `storage.rules` together with `firestore.rules`.
+- Use only content and streams you own or are authorized to redistribute.

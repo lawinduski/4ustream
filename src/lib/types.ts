@@ -1,4 +1,5 @@
 export type UserStatus = 'pending' | 'active' | 'disabled';
+export type AccessLevel = 'free' | 'vip';
 export type Category = 'ALL' | 'NEWS' | 'SPORTS' | 'BEIN' | 'MOVIES' | 'KIDS' | 'KURDISH' | 'ENTERTAINMENT';
 export type PlayerType = 'video' | 'iframe';
 
@@ -11,6 +12,7 @@ export type Channel = {
   streamUrl?: string;
   playerType?: PlayerType;
   enabled: boolean;
+  accessLevel?: AccessLevel;
 };
 
 export type MediaItem = {
@@ -24,6 +26,21 @@ export type MediaItem = {
   streamUrl?: string;
   playerType?: PlayerType;
   enabled?: boolean;
+  accessLevel?: AccessLevel;
+};
+
+export type DramaEpisode = {
+  id: string;
+  dramaId: string;
+  title: string;
+  seasonNumber: number;
+  episodeNumber: number;
+  durationMinutes?: number;
+  description?: string;
+  streamUrl?: string;
+  playerType?: PlayerType;
+  enabled: boolean;
+  accessLevel?: AccessLevel;
 };
 
 export type UserProfile = {
@@ -31,6 +48,8 @@ export type UserProfile = {
   name: string;
   email: string;
   status: UserStatus;
+  plan?: AccessLevel;
+  vipUntil?: unknown;
   createdAt?: unknown;
 };
 
@@ -48,6 +67,7 @@ export type AdBanner = {
   image: string;
   mobileImage?: string;
   link: string;
+  placement?: 'banner' | 'popup' | 'inline';
   enabled: boolean;
   order: number;
   createdAt?: unknown;
