@@ -69,7 +69,7 @@ function WatchInner() {
 
           <section className="glass rounded-3xl overflow-hidden">
             <StreamPlayer
-              url={episode?.streamUrl || item?.streamUrl}
+              url={episode?.streamUrl || item?.streamUrl  || ''}
               title={title}
               playerType={episode?.playerType || item?.playerType}
             />
