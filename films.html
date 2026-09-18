@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4uStream — Films</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.svg">
+<meta name="theme-color" content="#0b1020">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app-header"></div>
+<main class="container">
+  <div id="protected-root">
+    <div class="space-y-8">
+      <div>
+        <div id="access-pill" class="admin-badge" style="background:rgba(139,92,246,.1);color:#c4b5fd"></div>
+        <h1 style="font-size:2.4rem;font-weight:1000;margin-top:8px" data-t="films"></h1>
+        <p class="mt-2" style="color:#94a3b8">Watch your active authorized film catalog.</p>
+      </div>
+      <div class="grid grid-2 sm:grid-4 lg:grid-5 gap-4" id="films-grid"></div>
+      <div id="empty" class="empty-state hidden">No films are active yet.</div>
+    </div>
+  </div>
+</main>
+<div id="app-footer"></div>
+<script type="module" src="/js/pages/films.js"></script>
+</body>
+</html>

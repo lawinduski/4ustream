@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ku" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4uStream — Live</title>
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" href="/icons/icon-192.svg">
+<meta name="theme-color" content="#0b1020">
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+<div id="app-header"></div>
+<main class="container">
+  <div id="protected-root">
+    <div class="space-y-7">
+      <div>
+        <div class="flex items-center gap-2" style="color:#c4b5fd;font-size:13px;font-weight:800"><span id="ic-radio"></span> 4uStream Live</div>
+        <h1 style="font-size:2.4rem;font-weight:1000;margin-top:8px" data-t="live"></h1>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <div class="search-wrap"><span id="ic-search"></span><input id="q" class="input" data-t-placeholder="search"></div>
+        <select id="cat" class="input" style="max-width:200px">
+          <option>ALL</option><option>NEWS</option><option>SPORTS</option><option>BEIN</option>
+          <option>MOVIES</option><option>KIDS</option><option>KURDISH</option><option>ENTERTAINMENT</option>
+        </select>
+      </div>
+      <div id="player-section" class="glass rounded-3xl hidden" style="overflow:hidden">
+        <div id="player-mount"></div>
+        <div class="card-body" style="padding:20px">
+          <div id="p-category" class="card-kicker"></div>
+          <h2 id="p-name" style="font-size:1.4rem;font-weight:900;margin-top:4px"></h2>
+          <p id="p-desc" class="mt-2" style="color:#94a3b8"></p>
+        </div>
+      </div>
+      <div id="no-selection" class="glass rounded-2xl flex items-center gap-3" style="padding:18px;color:#94a3b8;font-size:13px">
+        <span id="ic-alert"></span> Choose a channel to start watching.
+      </div>
+      <div class="grid grid-2 sm:grid-3 lg:grid-5 gap-4" id="channel-grid"></div>
+      <div id="no-results" class="empty-state hidden" data-t="noResults"></div>
+    </div>
+  </div>
+</main>
+<div id="app-footer"></div>
+<script type="module" src="/js/pages/live.js"></script>
+</body>
+</html>
