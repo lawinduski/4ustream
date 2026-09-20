@@ -34,7 +34,9 @@ export default function Home() {
         setMedia(ms);
         setAds(as);
       })
-      .catch(() => {});
+      .catch((error) => {
+        console.error('4uStream content loading error:', error);
+      });
     return () => { mounted = false; };
   }, [isVip]);
 
