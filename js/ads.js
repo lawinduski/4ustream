@@ -1,5 +1,5 @@
 import { collection, getDocs } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
-import { db } from './firebase-init.js';
+import { getFirebase } from './firebase-init.js';
 
 const CACHE_TTL = 15_000;
 
@@ -15,6 +15,7 @@ export async function getAds(activeOnly = true) {
     }
   } catch {}
 
+  const { db } = await getFirebase();
   const snap = await getDocs(collection(db, 'ads'));
   const data = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
   try {
