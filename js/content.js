@@ -1,5 +1,5 @@
 import { collection, doc, getDoc, getDocs, query, where } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
-import { db } from './firebase-init.js';
+import { getFirebase } from './firebase-init.js';
 
 const CACHE_TTL = 15_000;
 
@@ -28,6 +28,7 @@ export async function getChannels(activeOnly = true, vip = false) {
   const cached = cacheGet(key);
   if (cached) return cached;
 
+  const { db } = await getFirebase();
   const ref = collection(db, 'channels');
   const constraints = activeOnly
     ? [where('enabled', '==', true), ...(vip ? [] : [where('accessLevel', '==', 'free')])]
@@ -43,6 +44,7 @@ export async function getMedia(activeOnly = true, vip = false) {
   const cached = cacheGet(key);
   if (cached) return cached;
 
+  const { db } = await getFirebase();
   const ref = collection(db, 'media');
   const constraints = activeOnly
     ? [where('enabled', '==', true), ...(vip ? [] : [where('accessLevel', '==', 'free')])]
@@ -54,6 +56,7 @@ export async function getMedia(activeOnly = true, vip = false) {
 }
 
 export async function getMediaById(id) {
+  const { db } = await getFirebase();
   const snap = await getDoc(doc(db, 'media', id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
@@ -64,6 +67,7 @@ export async function getEpisodes(dramaId, vip = false) {
   const cached = cacheGet(key);
   if (cached) return cached;
 
+  const { db } = await getFirebase();
   const ref = collection(db, 'episodes');
   const constraints = [
     where('dramaId', '==', dramaId),
@@ -79,6 +83,7 @@ export async function getEpisodes(dramaId, vip = false) {
 }
 
 export async function getEpisodeById(id) {
+  const { db } = await getFirebase();
   const snap = await getDoc(doc(db, 'episodes', id));
   if (!snap.exists()) return null;
   return { id: snap.id, ...snap.data() };
