@@ -1,12 +1,15 @@
 import { initShell } from '../app.js';
-import { auth, db } from '../firebase-init.js';
+import { getFirebase } from '../firebase-init.js';
 import { createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import { doc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { icon } from '../icons.js';
 
 document.getElementById('auth-icon').innerHTML = icon('user', 22);
 
-await initShell('account');
+const state = await initShell('account');
+const firebase = state.firebaseError ? null : await getFirebase();
+const auth = firebase?.auth;
+const db = firebase?.db;
 
 const form = document.getElementById('signup-form');
 const errorBox = document.getElementById('error');
@@ -23,6 +26,7 @@ form.addEventListener('submit', async (e) => {
   const name = document.getElementById('name').value;
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
+  if (!auth || !db) { showError('Service temporarily unavailable. Please try again later.'); return; }
   if (password.length < 8) { showError('Password must be at least 8 characters.'); return; }
 
   submitBtn.disabled = true;
