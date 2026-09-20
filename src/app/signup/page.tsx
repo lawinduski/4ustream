@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   updateProfile,
 } from 'firebase/auth';
 import {
@@ -53,16 +52,24 @@ export default function Signup() {
         displayName: name,
       });
 
-      const actionCodeSettings = {
-        url: 'https://4ustream.vercel.app/auth-action',
-        handleCodeInApp: true,
-      };
-
-      await sendEmailVerification(
-        c.user,
-        actionCodeSettings,
+      const verificationResponse = await fetch(
+        '/api/send-verification',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: c.user.email,
+          }),
+        },
       );
 
+if (!verificationResponse.ok) {
+  throw new Error(
+    'Could not send verification email.',
+  );
+}
       await setDoc(
         doc(db, 'users', c.user.uid),
         {
