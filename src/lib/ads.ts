@@ -21,10 +21,7 @@ export async function getAds(
       })
       .filter((ad) => {
         // Accept Firebase boolean as well as string/number values.
-        const enabled =
-          ad.enabled === true ||
-          ad.enabled === 'true' ||
-          ad.enabled === 1;
+        const enabled = ad.enabled === true;
 
         return !activeOnly || enabled;
       })
