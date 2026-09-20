@@ -1,11 +1,13 @@
 import { initShell } from '../app.js';
-import { auth } from '../firebase-init.js';
+import { getFirebase } from '../firebase-init.js';
 import { signInWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import { icon } from '../icons.js';
 
 document.getElementById('auth-icon').innerHTML = icon('login', 22);
 
-await initShell('account');
+const state = await initShell('account');
+const firebase = state.firebaseError ? null : await getFirebase();
+const auth = firebase?.auth;
 
 const form = document.getElementById('login-form');
 const errorBox = document.getElementById('error');
@@ -21,6 +23,7 @@ form.addEventListener('submit', async (e) => {
   errorBox.classList.add('hidden');
   submitBtn.disabled = true;
   document.getElementById('submit-icon').innerHTML = icon('loader', 17, 'spin');
+  if (!auth) { showError('Service temporarily unavailable. Please try again later.'); submitBtn.disabled = false; return; }
   try {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
@@ -40,6 +43,7 @@ form.addEventListener('submit', async (e) => {
 });
 
 document.getElementById('forgot-btn').addEventListener('click', async () => {
+  if (!auth) { showError('Service temporarily unavailable. Please try again later.'); return; }
   const email = document.getElementById('email').value;
   if (!email) { showError('Enter your email first.'); return; }
   try {
