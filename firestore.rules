@@ -1,25 +1,24 @@
-rules_version = '2';
-service cloud.firestore {
-  match /databases/{database}/documents {
-    function signedIn() { return request.auth != null; }
-    function isAdmin() { return signedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.active == true; }
-    function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
-    function activeUser() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active'; }
-    function vipUser() { return activeUser() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan == 'vip' && (!('vipUntil' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data) || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.vipUntil == null || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.vipUntil >= request.time); }
-    function contentAllowed() { return resource.data.accessLevel != 'vip' || vipUser(); }
+match /admins/{uid} {
+  allow read: if isOwner(uid);
+  allow write: if false;
+}
 
-    match /admins/{uid} { allow read: if isOwner(uid); allow write: if false; }
-    match /users/{uid} {
-      allow create: if isOwner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'active' && request.resource.data.email == request.auth.token.email;
-      allow read: if isOwner(uid) || isAdmin();
-      allow update: if isAdmin() || (isOwner(uid) && request.resource.data.uid == resource.data.uid && request.resource.data.email == resource.data.email && request.resource.data.status == 'active' && request.resource.data.plan == resource.data.plan && request.resource.data.vipUntil == resource.data.vipUntil);
-      allow delete: if isAdmin();
-    }
-    match /users/{uid}/favorites/{favoriteId} { allow read, create, update, delete: if isOwner(uid); }
-    match /channels/{id} { allow read: if isAdmin() || (contentAllowed() && resource.data.enabled == true); allow write: if isAdmin(); }
-    match /media/{id} { allow read: if isAdmin() || (contentAllowed() && resource.data.enabled == true); allow write: if isAdmin(); }
-    match /episodes/{id} { allow read: if isAdmin() || (contentAllowed() && resource.data.enabled == true); allow write: if isAdmin(); }
-    match /ads/{id} { allow read: if isAdmin() || resource.data.enabled == true; allow write: if isAdmin(); }
-    match /{document=**} { allow read, write: if false; }
-  }
+match /users/{uid} {
+  allow create: if isOwner(uid)
+    && request.resource.data.uid == uid
+    && request.resource.data.status == 'active'
+    && request.resource.data.email == request.auth.token.email;
+
+  allow read: if isOwner(uid) || isAdmin();
+
+  allow update: if isAdmin() || (
+    isOwner(uid)
+    && request.resource.data.uid == resource.data.uid
+    && request.resource.data.email == resource.data.email
+    && request.resource.data.status == 'active'
+    && request.resource.data.plan == resource.data.plan
+    && request.resource.data.vipUntil == resource.data.vipUntil
+  );
+
+  allow delete: if isAdmin();
 }
