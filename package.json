@@ -1,8 +1,0 @@
-{
-  "name": "4ustream",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "vercel-build": "echo 4uStream static build ready"
-  }
-}
