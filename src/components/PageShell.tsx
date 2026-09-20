@@ -1,0 +1,2 @@
+import { Header } from './Header';
+export function PageShell({children}:{children:React.ReactNode}){return <><div className="animated-bg"><span className="orb one"/><span className="orb two"/><span className="orb three"/></div><Header/><main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 sm:py-12">{children}</main><footer className="max-w-7xl mx-auto px-4 sm:px-6 py-10 text-xs text-slate-500">© {new Date().getFullYear()} 4uStream. Built for authorized content.</footer></>}
