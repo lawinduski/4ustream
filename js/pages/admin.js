@@ -1,5 +1,5 @@
 import { initShell, protectSection } from '../app.js';
-import { db } from '../firebase-init.js';
+import { getFirebase } from '../firebase-init.js';
 import {
   collection, deleteDoc, doc, getDoc, getDocs, orderBy, query,
   serverTimestamp, setDoc, Timestamp, updateDoc,
@@ -11,7 +11,11 @@ const CATEGORIES = ['NEWS', 'SPORTS', 'BEIN', 'MOVIES', 'KIDS', 'KURDISH', 'ENTE
 const root = document.getElementById('root');
 
 const state = await initShell('account');
-if (!protectSection(root, { ...state, loading: false })) {
+const firebase = state.firebaseError ? null : await getFirebase();
+const db = firebase?.db;
+if (state.firebaseError) {
+  // initShell already rendered the service error.
+} else if (!protectSection(root, { ...state, loading: false })) {
   // login/pending screen already rendered
 } else if (!state.user) {
   // unreachable — protectSection handles this
