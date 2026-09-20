@@ -241,3 +241,19 @@ textarea.input{min-height:80px}
 .light .nav-pill{color:#64748b}
 .light .nav-pill:hover,.light .nav-pill.active{color:#0f172a;background:rgba(15,23,42,.05)}
 .light body,.light{color:#0f172a}
+
+
+/* ===== 4uStream performance layer (2026.09.17-1) =====
+   Visual design/colors stay the same. These rules reduce mobile GPU work and
+   allow below-the-fold sections to be skipped until needed. */
+.premium-section{content-visibility:auto;contain-intrinsic-size:420px}
+.card{contain:layout paint}
+@media(max-width:700px){
+  .orb{animation:none;filter:blur(60px);opacity:.14}
+  .hero-glow-a,.hero-glow-b{animation:none;filter:blur(55px)}
+  .glass{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .glass-header{backdrop-filter:blur(16px) saturate(145%);-webkit-backdrop-filter:blur(16px) saturate(145%)}
+  .mobile-menu{backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+  .card-hover{transition:border-color .18s ease,box-shadow .18s ease}
+  .card-hover:hover{transform:none;box-shadow:none}
+}
