@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Link } from 'next/link';
+import  Link  from 'next/link';
 import { applyActionCode } from 'firebase/auth';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 
