@@ -1,5 +1,5 @@
 import { collection, deleteDoc, doc, getDoc, getDocs, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
-import { db } from './firebase-init.js';
+import { getFirebase } from './firebase-init.js';
 
 const KEY = '4u-favorites-v2';
 
@@ -24,6 +24,7 @@ function localFavorite(id, value) {
 
 export async function getFavorites(uid) {
   if (!uid) return readLocalFavorites();
+  const { db } = await getFirebase();
   const snap = await getDocs(collection(db, 'users', uid, 'favorites'));
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
@@ -31,6 +32,7 @@ export async function getFavorites(uid) {
 export async function toggleFavorite(uid, value) {
   if (!uid) return localFavorite(value.id, value);
   const key = `${value.type}-${value.id}`;
+  const { db } = await getFirebase();
   const ref = doc(db, 'users', uid, 'favorites', key);
   const existing = await getDoc(ref);
   let result;
