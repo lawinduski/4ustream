@@ -23,7 +23,26 @@ button,input { font:inherit; }
 @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
 .focus-ring:focus-visible { outline:2px solid #a78bfa; outline-offset:3px; }
 
-.channel-art img { object-fit: cover; object-position: center; display:block; }
+.channel-art img {   
+  display: block;   
+  object-fit: contain;   
+  object-position: center; 
+}  
+.channel-logo-surface {
+  isolation: isolate; 
+}  
+.channel-logo {
+  object-fit: contain !important;
+  object-position: center !important;
+  filter: drop-shadow(0 12px 22px rgba(0, 0, 0, .28));
+  transition:
+    transform .25s ease,
+    filter .25s ease;
+}  
+.channel-card:hover .channel-logo {
+  transform: scale(1.035);
+  filter: drop-shadow(0 15px 28px rgba(0, 0, 0, .38)); 
+}
 .account-header-btn { background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.08); }
 .mobile-bottom-nav { background:transparent; }
 .bottom-nav-item { min-width:0; min-height:42px; display:flex; align-items:center; justify-content:center; border-radius:12px; color:#94a3b8; transition:background .2s ease,color .2s ease,transform .2s ease; }
