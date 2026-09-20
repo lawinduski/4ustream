@@ -7,38 +7,26 @@ React hydration on every page, a large JS bundle to download before
 anything is interactive, and Tailwind's runtime overhead. None of that
 exists here — the browser just runs the files directly.
 
-## 1. Set your Firebase config in Vercel (not in the code)
+## 1. Add your Firebase config
 
-Your Firebase keys never live in this repo. Instead there's a tiny
-serverless function (`api/config.js`) that reads them from Vercel's
-**Environment Variables** at request time and hands them to the browser.
+Open `js/firebase-init.js` and paste in the **same values** you already
+have in Vercel's environment variables for the old project (Firebase
+Console → Project settings → your web app → SDK setup and configuration):
 
-In your Vercel project → Settings → Environment Variables, make sure these
-exist (same names your old Next.js project used — if you're deploying into
-the *same* Vercel project, they're probably already there and you don't
-need to do anything):
-
-```
-NEXT_PUBLIC_FIREBASE_API_KEY
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
-NEXT_PUBLIC_FIREBASE_PROJECT_ID
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID
-NEXT_PUBLIC_FIREBASE_APP_ID
+```js
+const firebaseConfig = {
+  apiKey: "...",
+  authDomain: "...",
+  projectId: "...",
+  storageBucket: "...",
+  messagingSenderId: "...",
+  appId: "...",
+};
 ```
 
-That's it — nothing to paste into any file. `js/firebase-init.js` fetches
-`/api/config` on load and initializes Firebase with whatever comes back.
-
-One honest note: Firebase's client config (`apiKey` etc.) isn't actually a
-secret by Google's own design — the real protection is your
-`firestore.rules` / `storage.rules`, which run server-side. Routing it
-through `/api/config` is about keeping it only in Vercel rather than
-about hiding something sensitive.
-
-Your existing `firestore.rules` and `storage.rules` are copied into this
-folder unchanged — deploy them with the Firebase CLI exactly like before
-if you haven't already:
+That's the only thing you need to change. Your existing `firestore.rules`
+and `storage.rules` are copied into this folder unchanged — deploy them
+with the Firebase CLI exactly like before if you haven't already:
 
 ```bash
 firebase deploy --only firestore:rules,storage:rules
@@ -46,15 +34,17 @@ firebase deploy --only firestore:rules,storage:rules
 
 ## 2. Run it locally
 
-No `npm install`, no build for the static files — but `/api/config.js`
-is a Vercel serverless function, so local testing needs the Vercel CLI
-(a plain static server like `npx serve` won't run `/api/*`):
+No `npm install`, no build. Any static file server works, e.g.:
 
 ```bash
-npm i -g vercel   # once
-vercel env pull   # pulls your env vars locally into .env
-vercel dev
+npx serve .
+# or
+python3 -m http.server 5500
 ```
+
+(Opening `index.html` directly with `file://` will NOT work — the pages
+use `fetch()` for `data/i18n.json` and ES module imports, both of which
+need `http://`.)
 
 ## 3. Deploy
 
@@ -108,7 +98,7 @@ account.html            Profile, favorites, sign out
 search.html              Channel search
 admin.html               Admin console
 css/style.css            All styles
-js/firebase-init.js      Fetches config from /api/config at runtime
+js/firebase-init.js      ⚠️ put your config here
 js/app.js                Header/nav/theme/lang/auth shell, shared card UI
 js/content.js            Firestore reads for channels/media/episodes
 js/favorites.js, ads.js, access.js, storage.js, player.js, icons.js, i18n.js
@@ -118,7 +108,6 @@ data/channels.seed.json  Your original 62 starter channels, as JSON —
                           handy if you ever want to bulk-import them into
                           Firestore again.
 manifest.webmanifest, sw.js, icons/  PWA
-api/config.js                        Vercel serverless function — serves Firebase config from env vars
 firestore.rules, storage.rules       Copied from your repo, unchanged
 ```
 
