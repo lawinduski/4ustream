@@ -78,12 +78,12 @@ export default function AuthActionPage() {
               Your 4uStream account has been verified successfully.
             </p>
 
-            <a
+            <Link
               href="/"
               className="mt-7 inline-flex rounded-2xl bg-white px-6 py-3 font-black text-slate-950 transition hover:scale-105"
             >
               Continue to 4uStream
-            </a>
+            </Link>
           </>
         )}
 
