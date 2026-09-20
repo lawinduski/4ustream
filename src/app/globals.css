@@ -53,19 +53,10 @@ button,input { font:inherit; }
 @media (max-width:640px){body{padding-bottom:78px}.hero-premium{box-shadow:0 20px 60px rgba(0,0,0,.2)}.quick-grid{gap:9px}}
 
 /* 4uStream performance layer — visual design intentionally preserved */
-.premium-section {
-  min-width: 0;
-}
-
-.card-hover {
-  min-width: 0;
-}
-
-.channel-art,
-.ad-shell,
-.hero-premium {
-  min-width: 0;
-}
+.premium-section { content-visibility: auto; contain-intrinsic-size: 420px; }
+.card-hover { contain: layout paint; }
+.channel-art, .ad-shell { contain: layout paint; }
+.hero-premium { contain: layout paint; }
 @media (max-width: 640px) {
   .orb { will-change: transform; }
   .hero-glow { will-change: transform; }
@@ -120,38 +111,4 @@ button,input { font:inherit; }
   .discovery-strip{align-items:flex-start;flex-direction:column;gap:9px}
   .discovery-links{width:100%}
   .hero-cinema{border-radius:1.7rem}
-}
-
-/* Ad popup modal: viewport-centered, portal-safe, and mobile/iOS friendly. */
-.ad-popup-modal {
-  min-height: 100dvh;
-  padding-bottom: max(1rem, env(safe-area-inset-bottom));
-  animation: adPopupFadeIn 0.2s ease-out both;
-}
-
-.ad-popup-card {
-  animation: adPopupScaleIn 0.22s cubic-bezier(.2,.8,.2,1) both;
-  -webkit-overflow-scrolling: touch;
-}
-
-@keyframes adPopupFadeIn {
-  from {
-    opacity: 0;
-  }
-
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes adPopupScaleIn {
-  from {
-    opacity: 0;
-    transform: scale(.96) translateY(8px);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
 }
