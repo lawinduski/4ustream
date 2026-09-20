@@ -1,4 +1,4 @@
-import { auth, db } from './firebase-init.js';
+import { getFirebase } from './firebase-init.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-auth.js';
 import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.2.1/firebase-firestore.js';
 import { icon } from './icons.js';
@@ -18,9 +18,15 @@ let deferredInstall = null;
 window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredInstall = e; });
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').catch(() => {});
-  });
+  window.addEventListener('load', async () => {
+    try {
+      const registration = await navigator.serviceWorker.register('/sw.js', {
+        scope: '/',
+        updateViaCache: 'none',
+      });
+      await registration.update();
+    } catch {}
+  }, { once: true });
 }
 
 function getTheme() { return localStorage.getItem('4u-theme') || 'dark'; }
@@ -96,6 +102,21 @@ export async function initShell(active) {
   applyLangAttrs(getLang());
   setTheme(getTheme());
 
+  let firebase;
+  try {
+    firebase = await getFirebase();
+  } catch (error) {
+    const message = error?.message || 'Firebase could not be initialized.';
+    const headerSlot = document.getElementById('app-header');
+    const footerSlot = document.getElementById('app-footer');
+    if (headerSlot) headerSlot.outerHTML = headerHTML(active);
+    if (footerSlot) footerSlot.outerHTML = footerHTML();
+    const root = document.getElementById('root');
+    if (root) root.innerHTML = `<div class="empty-state"><h2 style="font-size:22px;font-weight:800">Service temporarily unavailable</h2><p class="mt-2" style="color:#94a3b8">${message.replace(/[<>]/g, '')}</p></div>`;
+    return { user: null, profile: null, isVip: false, firebaseError: true };
+  }
+  const { auth, db } = firebase;
+
   const headerSlot = document.getElementById('app-header');
   const footerSlot = document.getElementById('app-footer');
   if (headerSlot) headerSlot.outerHTML = headerHTML(active);
@@ -159,6 +180,7 @@ function renderAccountSlot(user, profile) {
 }
 
 export async function doSignOut() {
+  const { auth } = await getFirebase();
   await signOut(auth);
   location.href = '/';
 }
