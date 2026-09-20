@@ -69,7 +69,7 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
 
     body.style.overflow = 'hidden';
     body.style.position = 'fixed';
-    body.style.top = -${scrollY}px;
+    body.style.top = '-${scrollY}px';
     body.style.width = '100%';
     html.style.overflow = 'hidden';
 
