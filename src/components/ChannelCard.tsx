@@ -82,7 +82,7 @@ export function ChannelCard({ channel }: { channel: Channel }) {
                 alt={channel.name}
                 loading="lazy"
                 decoding="async"
-                className="relative z-10 block max-w-[92%] max-h-[84%] w-auto h-auto object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,.55)] transition-transform duration-500 group-hover:scale-[1.18]"
+                className="relative z-10 block max-w-[92%] max-h-[84%] w-auto h-auto object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,.55)] transition-transform duration-500 group-hover:scale-[1.60]"
               />
             ) : (
               <div className="relative z-10 h-16 w-16 rounded-2xl bg-white/5 border border-white/10 grid place-items-center shadow-xl">
