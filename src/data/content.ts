@@ -7,7 +7,7 @@ export type MediaItem = {
   description: string;
   poster: string;
   streamUrl?: string;
-  playerType?: 'video' | 'iframe';
+  playerType?: 'video' | 'hls' | 'iframe';
   enabled?: boolean;
 };
 

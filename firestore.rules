@@ -6,13 +6,13 @@ service cloud.firestore {
     function isOwner(uid) { return signedIn() && request.auth.uid == uid; }
     function activeUser() { return signedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active'; }
     function vipUser() { return activeUser() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.plan == 'vip' && (!('vipUntil' in get(/databases/$(database)/documents/users/$(request.auth.uid)).data) || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.vipUntil == null || get(/databases/$(database)/documents/users/$(request.auth.uid)).data.vipUntil >= request.time); }
-    function contentAllowed() { return activeUser() && (resource.data.accessLevel != 'vip' || vipUser()); }
+    function contentAllowed() { return resource.data.accessLevel != 'vip' || vipUser(); }
 
     match /admins/{uid} { allow read: if isOwner(uid); allow write: if false; }
     match /users/{uid} {
-      allow create: if isOwner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'pending' && request.resource.data.email == request.auth.token.email;
+      allow create: if isOwner(uid) && request.resource.data.uid == uid && request.resource.data.status == 'active' && request.resource.data.email == request.auth.token.email;
       allow read: if isOwner(uid) || isAdmin();
-      allow update: if isAdmin() || (isOwner(uid) && request.resource.data.uid == resource.data.uid && request.resource.data.email == resource.data.email && request.resource.data.status == resource.data.status && request.resource.data.plan == resource.data.plan && request.resource.data.vipUntil == resource.data.vipUntil);
+      allow update: if isAdmin() || (isOwner(uid) && request.resource.data.uid == resource.data.uid && request.resource.data.email == resource.data.email && request.resource.data.status == 'active' && request.resource.data.plan == resource.data.plan && request.resource.data.vipUntil == resource.data.vipUntil);
       allow delete: if isAdmin();
     }
     match /users/{uid}/favorites/{favoriteId} { allow read, create, update, delete: if isOwner(uid); }

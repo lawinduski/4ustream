@@ -1,7 +1,7 @@
 export type UserStatus = 'pending' | 'active' | 'disabled';
 export type AccessLevel = 'free' | 'vip';
 export type Category = 'ALL' | 'NEWS' | 'SPORTS' | 'BEIN' | 'MOVIES' | 'KIDS' | 'KURDISH' | 'ENTERTAINMENT';
-export type PlayerType = 'video' | 'iframe';
+export type PlayerType = 'video' | 'hls' | 'iframe';
 
 export type Channel = {
   id: string;

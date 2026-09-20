@@ -63,3 +63,52 @@ button,input { font:inherit; }
   .glass, .glass-header, .mobile-menu { -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
   .hero-premium { -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px); }
 }
+
+/* 4uStream discovery layer — inspired by modern Kurdish streaming UX, not copied from any site */
+.vip-showcase{border:1px solid rgba(167,139,250,.16);background:linear-gradient(135deg,rgba(139,92,246,.11),rgba(6,182,212,.055))}
+.vip-showcase .section-kicker{color:#c4b5fd}
+
+/* ===== 4uStream Cinema UX 2026.09 ===== */
+.hero-cinema{min-height:500px}
+.hero-backdrop{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;opacity:.22;filter:saturate(.9) blur(1px);transform:scale(1.03);pointer-events:none}
+.hero-backdrop-shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(7,9,15,.98) 0%,rgba(7,9,15,.84) 48%,rgba(7,9,15,.36) 100%),linear-gradient(0deg,rgba(7,9,15,.88),transparent 55%);pointer-events:none}
+.hero-kicker{display:inline-flex;align-items:center;gap:7px;margin-top:16px;color:#a5f3fc;font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.hero-poster-card{position:relative;aspect-[2/3] max-height:330px;overflow:hidden;border-radius:24px;border:1px solid rgba(255,255,255,.13);box-shadow:0 30px 70px rgba(0,0,0,.35);background:#0b1020}
+.hero-poster-card img{width:100%;height:100%;object-fit:cover;display:block}
+.hero-poster-card:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 55%,rgba(0,0,0,.85))}
+.hero-poster-card div{position:absolute;z-index:2;inset-inline:14px;bottom:13px;display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:900}
+.hero-poster-card div span{color:#c4b5fd}.hero-poster-card div b{color:#cbd5e1}
+.discovery-strip{display:flex;align-items:center;gap:14px;overflow:hidden}
+.discovery-title{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;color:#c4b5fd;font-size:11px;font-weight:900}
+.discovery-links{display:flex;gap:7px;overflow-x:auto;scrollbar-width:none;min-width:0}
+.discovery-links::-webkit-scrollbar{display:none}
+.discovery-links a{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:9px 12px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06);color:#94a3b8;font-size:10px;font-weight:800;transition:.18s}
+.discovery-links a:hover{color:#fff;background:rgba(139,92,246,.12);border-color:rgba(167,139,250,.18)}
+.rail-grid{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(190px,220px);gap:14px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:thin}
+.rail-grid>*{scroll-snap-align:start;min-width:0}
+.rail-grid::-webkit-scrollbar{height:6px}.rail-grid::-webkit-scrollbar-thumb{background:rgba(148,163,184,.18);border-radius:999px}
+.vip-rail{grid-auto-columns:minmax(170px,190px)}
+.channel-card .channel-art{isolation:isolate}
+.channel-card .channel-art-glow{background:radial-gradient(circle at 50% 45%,rgba(139,92,246,.13),transparent 58%);z-index:0}
+.channel-logo{position:relative;z-index:1;max-width:92%;max-height:88%;object-fit:contain;filter:drop-shadow(0 12px 20px rgba(0,0,0,.24));transition:transform .25s ease,filter .25s ease}
+.channel-card:hover .channel-logo{transform:scale(1.045);filter:drop-shadow(0 16px 28px rgba(0,0,0,.35))}
+.live-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 7px;background:rgba(22,163,74,.88);color:#fff;font-size:8px;font-weight:1000;box-shadow:0 7px 18px rgba(0,0,0,.2)}
+.live-badge span{width:5px;height:5px;border-radius:50%;background:#bbf7d0;box-shadow:0 0 0 3px rgba(187,247,208,.12)}
+.media-art img{transition:transform .35s ease,filter .35s ease}.group:hover .media-art img{transform:scale(1.035);filter:saturate(1.05)}
+.player-frame{background:#000}
+
+/* Keep the premium look while reducing mobile GPU pressure. */
+@media (max-width: 700px){
+  .hero-cinema{min-height:430px}
+  .hero-backdrop{opacity:.16;filter:none}
+  .hero-backdrop-shade{background:linear-gradient(180deg,rgba(7,9,15,.93),rgba(7,9,15,.68) 55%,rgba(7,9,15,.97))}
+  .glass{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+  .glass-header{backdrop-filter:blur(14px) saturate(145%);-webkit-backdrop-filter:blur(14px) saturate(145%)}
+  .rail-grid{grid-auto-columns:minmax(155px,175px);gap:10px}
+  .vip-rail{grid-auto-columns:minmax(150px,165px)}
+}
+@media (max-width: 520px){
+  .discovery-strip{align-items:flex-start;flex-direction:column;gap:9px}
+  .discovery-links{width:100%}
+  .hero-cinema{border-radius:1.7rem}
+}
