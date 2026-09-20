@@ -112,3 +112,37 @@ button,input { font:inherit; }
   .discovery-links{width:100%}
   .hero-cinema{border-radius:1.7rem}
 }
+
+/* Ad popup modal: viewport-centered, portal-safe, and mobile/iOS friendly. */
+.ad-popup-modal {
+  min-height: 100dvh;
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  animation: adPopupFadeIn 0.2s ease-out both;
+}
+
+.ad-popup-card {
+  animation: adPopupScaleIn 0.22s cubic-bezier(.2,.8,.2,1) both;
+  -webkit-overflow-scrolling: touch;
+}
+
+@keyframes adPopupFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes adPopupScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(.96) translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
