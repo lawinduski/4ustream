@@ -4,12 +4,21 @@ import Link from 'next/link';
 import { LockKeyhole, Play, Star, Radio } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { Channel } from '@/lib/types';
-import { readLocalFavorites, toggleFavorite, getFavorites } from '@/lib/favorites';
+import {
+  readLocalFavorites,
+  toggleFavorite,
+  getFavorites,
+} from '@/lib/favorites';
 import { useApp } from './AppProvider';
 
 export function ChannelCard({ channel }: { channel: Channel }) {
   const { user } = useApp();
   const [fav, setFav] = useState(false);
+  const [logoError, setLogoError] = useState(false);
+
+  useEffect(() => {
+    setLogoError(false);
+  }, [channel.logo]);
 
   useEffect(() => {
     const sync = () => {
@@ -57,42 +66,46 @@ export function ChannelCard({ channel }: { channel: Channel }) {
     setFav(next);
   };
 
+  const showFallback = !channel.logo || logoError;
+
   return (
     <article className="glass channel-card card-hover rounded-2xl overflow-hidden group relative">
-      {/* Channel artwork */}
-      <div className="channel-art aspect-[16/9] relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 isolation-isolate">
-        
-        {/* Background glow */}
-        <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_45%,rgba(139,92,246,.18),transparent_58%)]" />
+      {/* Channel thumbnail */}
+      <div className="channel-art aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 isolation-isolate">
+        {/* Premium background glow */}
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_45%,rgba(139,92,246,.16),transparent_62%)]" />
 
-        {/* Soft light */}
-        <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-40 h-40 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
+        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-44 h-44 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
 
-        {/* Logo frame */}
-        <div className="absolute inset-3 sm:inset-4 z-[1] rounded-2xl border border-white/10 bg-white/[0.025] shadow-inner overflow-hidden">
-          
-          {/* Inner glow */}
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.07),transparent_65%)]" />
+        {/* Logo area */}
+        <div className="absolute inset-0 z-[1] flex items-center justify-center p-2 sm:p-3">
+          <div className="channel-logo-surface relative flex items-center justify-center w-[86%] h-[82%] rounded-[1.35rem] overflow-hidden border border-white/10 bg-white/[0.045] shadow-[inset_0_1px_0_rgba(255,255,255,.06),0_12px_35px_rgba(0,0,0,.18)]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,.055),transparent_68%)] pointer-events-none" />
 
-          {/* Logo */}
-          <div className="absolute inset-0 flex items-center justify-center p-6 sm:p-8">
-            {channel.logo ? (
+            {showFallback ? (
+              <div className="relative z-10 flex flex-col items-center justify-center gap-2 px-4 text-center">
+                <div className="h-12 w-12 rounded-2xl bg-white/[0.07] border border-white/10 grid place-items-center">
+                  <Radio size={23} className="text-violet-300" />
+                </div>
+
+                <span className="max-w-[90%] text-xs font-bold text-slate-300 truncate">
+                  {channel.name}
+                </span>
+              </div>
+            ) : (
               <img
                 src={channel.logo}
                 alt={channel.name}
                 loading="lazy"
                 decoding="async"
-                className="relative z-10 block max-w-[92%] max-h-[84%] w-auto h-auto object-contain drop-shadow-[0_12px_30px_rgba(0,0,0,.55)] transition-transform duration-500 group-hover:scale-[1.60]"
+                onError={() => setLogoError(true)}
+                className="channel-logo relative z-10 block w-[84%] h-[82%] object-contain object-center"
               />
-            ) : (
-              <div className="relative z-10 h-16 w-16 rounded-2xl bg-white/5 border border-white/10 grid place-items-center shadow-xl">
-                <Radio size={25} className="text-violet-300" />
-              </div>
             )}
           </div>
         </div>
 
-        {/* Top badges */}
+        {/* LIVE / VIP badges */}
         <div className="absolute top-2.5 start-2.5 z-30 flex items-center gap-1.5">
           {channel.accessLevel === 'vip' && (
             <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/90 px-2.5 py-1 text-[10px] font-black text-white shadow-lg backdrop-blur-xl">
@@ -111,10 +124,12 @@ export function ChannelCard({ channel }: { channel: Channel }) {
 
         {/* Favorite */}
         <button
+          type="button"
           onClick={favClick}
-          className={`absolute top-2.5 end-2.5 z-30 h-9 w-9 rounded-xl bg-black/50 backdrop-blur-xl border border-white/10 grid place-items-center text-slate-300 transition-all duration-200 hover:bg-black/70 hover:text-yellow-300 ${
+          aria-label="Favorite"
+          className={`absolute top-2.5 end-2.5 z-40 h-9 w-9 rounded-xl bg-black/55 backdrop-blur-xl border border-white/10 grid place-items-center text-slate-300 transition-all duration-200 hover:bg-black/75 hover:text-yellow-300 ${
             fav ? 'text-yellow-300' : ''
-          }`}aria-label="Favorite"
+          }`}
         >
           <Star
             size={16}
@@ -122,14 +137,14 @@ export function ChannelCard({ channel }: { channel: Channel }) {
           />
         </button>
 
-        {/* Play overlay */}
+        {/* Play button */}
         <Link
           href={`/live?channel=${encodeURIComponent(channel.id)}`}
           aria-label={`Watch ${channel.name}`}
-          className="absolute inset-0 z-20 flex items-end justify-center pb-3 sm:pb-4 bg-gradient-to-t from-black/65 via-black/5 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
+          className="absolute inset-0 z-20 flex items-end justify-center pb-3 pointer-events-none opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300"
         >
-          <span className="h-11 w-11 sm:h-12 sm:w-12 rounded-full bg-white text-slate-950 grid place-items-center shadow-[0_10px_35px_rgba(0,0,0,.45)] border border-white/20 transition-transform duration-300 hover:scale-110">
-            <Play size={18} fill="currentColor" />
+          <span className="pointer-events-auto h-10 w-10 rounded-full bg-white/95 text-slate-950 grid place-items-center shadow-[0_8px_25px_rgba(0,0,0,.42)] border border-white/30 transition-transform duration-200 hover:scale-110">
+            <Play size={16} fill="currentColor" />
           </span>
         </Link>
       </div>
