@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { Link } from 'next/link';
 import { applyActionCode } from 'firebase/auth';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 
@@ -101,12 +102,12 @@ export default function AuthActionPage() {
               This verification link is invalid or has expired.
             </p>
 
-            <a
+            <Link
               href="/"
               className="mt-7 inline-flex rounded-2xl bg-white px-6 py-3 font-black text-slate-950"
             >
               Back to 4uStream
-            </a>
+            </Link>
           </>
         )}
 
