@@ -30,9 +30,7 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
     if (banners.length < 2) return;
 
     const id = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        setIndex((i) => (i + 1) % banners.length);
-      }
+      setIndex((i) => (i + 1) % banners.length);
     }, 5000);
 
     return () => window.clearInterval(id);
@@ -42,10 +40,8 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
     if (!popups.length) return;
 
     const id = window.setInterval(() => {
-      if (document.visibilityState === 'visible') {
-        setPopupIndex((i) => (i + 1) % popups.length);
-        setOpen(true);
-      }
+      setPopupIndex((i) => (i + 1) % popups.length);
+      setOpen(true);
     }, 5000);
 
     return () => window.clearInterval(id);
@@ -73,7 +69,7 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
 
     body.style.overflow = 'hidden';
     body.style.position = 'fixed';
-    body.style.top = `-${scrollY}px`;
+    body.style.top = '-${scrollY}px';
     body.style.width = '100%';
     html.style.overflow = 'hidden';
 

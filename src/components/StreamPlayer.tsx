@@ -30,11 +30,7 @@ export function StreamPlayer({ url, title, playerType = 'video', resumeKey }: Pr
       if (!resumeKey) return;
       try {
         const saved = Number(localStorage.getItem(`4u-progress:${resumeKey}`) || 0);
-        if (
-          Number.isFinite(saved) &&
-          saved > 5 &&
-          saved < Math.max(video.duration - 10, 0)
-        ) {
+        if (Number.isFinite(saved) && saved > 5 && saved < Math.max(video.duration - 10, 0)) {
           video.currentTime = saved;
         }
       } catch {}
@@ -43,14 +39,10 @@ export function StreamPlayer({ url, title, playerType = 'video', resumeKey }: Pr
     const saveProgress = () => {
       if (!resumeKey || !Number.isFinite(video.currentTime) || video.currentTime < 5) return;
       const now = Date.now();
-      if (now - lastSaved.current < 5000) return;
+      if (now - lastSaved.current < 4000) return;
       lastSaved.current = now;
-
       try {
-        localStorage.setItem(
-          `4u-progress:${resumeKey}`,
-          String(Math.floor(video.currentTime))
-        );
+        localStorage.setItem(`4u-progress:${resumeKey}`, String(Math.floor(video.currentTime)));
       } catch {}
     };
 
@@ -64,18 +56,8 @@ export function StreamPlayer({ url, title, playerType = 'video', resumeKey }: Pr
         try {
           const Hls = (await import('hls.js')).default;
           if (cancelled) return;
-
           if (Hls.isSupported()) {
-            hls = new Hls({
-              enableWorker: true,
-              lowLatencyMode: false,
-              backBufferLength: 30,
-              maxBufferLength: 20,
-              maxMaxBufferLength: 40,
-              capLevelToPlayerSize: true,
-              startLevel: -1,
-            });
-
+            hls = new Hls({ enableWorker: true, lowLatencyMode: true });
             hls.loadSource(url);
             hls.attachMedia(video);
           } else {
@@ -91,18 +73,13 @@ export function StreamPlayer({ url, title, playerType = 'video', resumeKey }: Pr
 
     video.addEventListener('loadedmetadata', restore);
     video.addEventListener('timeupdate', saveProgress);
-    void setup();
+    setup();
 
     return () => {
       cancelled = true;
       video.removeEventListener('loadedmetadata', restore);
       video.removeEventListener('timeupdate', saveProgress);
-
-      if (hls) {
-        hls.destroy();
-        hls = null;
-      }
-
+      if (hls) hls.destroy();
       video.removeAttribute('src');
       video.load();
     };

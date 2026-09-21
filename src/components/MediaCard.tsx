@@ -2,42 +2,26 @@
 
 import Link from 'next/link';
 import { Play, Star, LockKeyhole } from 'lucide-react';
-import { memo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { MediaItem } from '@/lib/types';
-import { isRemoteFavorite, readLocalFavorites, toggleFavorite } from '@/lib/favorites';
+import { readLocalFavorites, toggleFavorite } from '@/lib/favorites';
 import { useApp } from './AppProvider';
 
-export const MediaCard = memo(function MediaCard({ item }: { item: MediaItem }) {
+export function MediaCard({ item }: { item: MediaItem }) {
   const { user } = useApp();
   const [fav, setFav] = useState(false);
 
   useEffect(() => {
-    let active = true;
-
-    const sync = () => {
-      if (!user) {
-        setFav(
-          readLocalFavorites().some(
-            x => x.id === item.id && x.type === 'media'
-          )
-        );
-        return;
-      }
-
-      isRemoteFavorite(user.uid, { id: item.id, type: 'media' })
-        .then(value => {
-          if (active) setFav(value);
-        })
-        .catch(() => {});
-    };
-
+    const sync = () => setFav(readLocalFavorites().some((x) => x.id === item.id && x.type === 'media'));
     sync();
     window.addEventListener('4u-favorites-changed', sync);
+    return () => window.removeEventListener('4u-favorites-changed', sync);
+  }, [item.id]);
 
-    return () => {
-      active = false;
-      window.removeEventListener('4u-favorites-changed', sync);
-    };
+  useEffect(() => {
+    if (!user) return;
+    import('@/lib/favorites')
+      .then(({ getFavorites }) => getFavorites(user.uid).then((a) => setFav(a.some((x) => x.id === item.id && x.type === 'media'))).catch(() => {}));
   }, [user, item.id]);
 
   const favClick = async (e: React.MouseEvent) => {
@@ -84,4 +68,4 @@ export const MediaCard = memo(function MediaCard({ item }: { item: MediaItem }) 
       </button>
     </div>
   );
-});
+}

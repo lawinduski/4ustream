@@ -1,7 +1,5 @@
-const CACHE = '4ustream-shell-v2026.09.21-1';
-const RUNTIME = '4ustream-runtime-v2026.09.21-1';
+const CACHE = '4ustream-shell-v2026.09.20-1';
 const OFFLINE = ['/manifest.webmanifest'];
-const MAX_RUNTIME_ENTRIES = 40;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -16,23 +14,12 @@ self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
-        keys
-          .filter((key) => key !== CACHE && key !== RUNTIME)
-          .map((key) => caches.delete(key))
+        keys.filter((key) => key !== CACHE).map((key) => caches.delete(key))
       )
     )
   );
   self.clients.claim();
 });
-
-async function trimRuntimeCache() {
-  const cache = await caches.open(RUNTIME);
-  const keys = await cache.keys();
-  if (keys.length <= MAX_RUNTIME_ENTRIES) return;
-
-  const removeCount = keys.length - MAX_RUNTIME_ENTRIES;
-  await Promise.all(keys.slice(0, removeCount).map((key) => cache.delete(key)));
-}
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
@@ -53,42 +40,15 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Next static assets are immutable and safe to serve from cache after first load.
+  // Cache static Next assets after the first successful request.
   if (url.pathname.startsWith('/_next/static/')) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
-
         return fetch(event.request).then((response) => {
           if (response.ok) {
             const copy = response.clone();
-            caches.open(CACHE)
-              .then((cache) => cache.put(event.request, copy))
-              .catch(() => {});
-          }
-          return response;
-        });
-      })
-    );
-    return;
-  }
-
-  // Cache only local, non-HTML visual assets. External streaming/media URLs
-  // are intentionally untouched.
-  if (/\.(?:png|jpe?g|webp|gif|svg|ico|woff2?)$/i.test(url.pathname)) {
-    event.respondWith(
-      caches.match(event.request).then((cached) => {
-        if (cached) return cached;
-
-        return fetch(event.request).then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(RUNTIME)
-              .then(async (cache) => {
-                await cache.put(event.request, copy);
-                await trimRuntimeCache();
-              })
-              .catch(() => {});
+            caches.open(CACHE).then((cache) => cache.put(event.request, copy)).catch(() => {});
           }
           return response;
         });
