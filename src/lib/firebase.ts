@@ -1,6 +1,6 @@
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
-import { getFirestore } from 'firebase/firestore';
+import { getFirestore, initializeFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,4 +13,21 @@ const firebaseConfig = {
 
 export const firebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 export const auth = getAuth(firebaseApp);
-export const db = getFirestore(firebaseApp);
+
+/**
+ * Safari (especially behind iCloud Private Relay, a VPN or a content blocker) can stall
+ * Firestore's default WebChannel streaming. Auto-detection switches to long polling when
+ * streaming does not work, and keeps the faster transport everywhere else.
+ *
+ * initializeFirestore() throws if Firestore was already initialised (for example after a
+ * hot reload), so fall back to the existing instance in that case.
+ */
+function createDb() {
+  try {
+    return initializeFirestore(firebaseApp, { experimentalAutoDetectLongPolling: true });
+  } catch {
+    return getFirestore(firebaseApp);
+  }
+}
+
+export const db = createDb();

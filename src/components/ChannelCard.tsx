@@ -4,66 +4,27 @@ import Link from 'next/link';
 import { LockKeyhole, Play, Star, Radio } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { Channel } from '@/lib/types';
-import {
-  readLocalFavorites,
-  toggleFavorite,
-  getFavorites,
-} from '@/lib/favorites';
-import { useApp } from './AppProvider';
+import { useFavorites } from './FavoritesProvider';
 
 export function ChannelCard({ channel }: { channel: Channel }) {
-  const { user } = useApp();
-  const [fav, setFav] = useState(false);
+  const { isFavorite, toggle } = useFavorites();
+  const fav = isFavorite(channel.id, 'channel');
   const [logoError, setLogoError] = useState(false);
 
   useEffect(() => {
     setLogoError(false);
   }, [channel.logo]);
 
-  useEffect(() => {
-    const sync = () => {
-      setFav(
-        readLocalFavorites().some(
-          (x) => x.id === channel.id && x.type === 'channel'
-        )
-      );
-    };
-
-    sync();
-
-    window.addEventListener('4u-favorites-changed', sync);
-
-    return () => {
-      window.removeEventListener('4u-favorites-changed', sync);
-    };
-  }, [channel.id]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    getFavorites(user.uid)
-      .then((a) =>
-        setFav(
-          a.some(
-            (x) => x.id === channel.id && x.type === 'channel'
-          )
-        )
-      )
-      .catch(() => {});
-  }, [user, channel.id]);
-
   const favClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const next = await toggleFavorite(user?.uid, {
+    await toggle({
       id: channel.id,
       type: 'channel',
       title: channel.name,
       image: channel.logo,
     });
-
-    setFav(next);
   };
 
   const showFallback = !channel.logo || logoError;
@@ -74,8 +35,6 @@ export function ChannelCard({ channel }: { channel: Channel }) {
       <div className="channel-art aspect-[16/10] relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 isolation-isolate">
         {/* Premium background glow */}
         <div className="absolute inset-0 z-0 bg-[radial-gradient(circle_at_50%_45%,rgba(139,92,246,.16),transparent_62%)]" />
-
-        <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-44 h-44 rounded-full bg-violet-500/10 blur-3xl pointer-events-none" />
 
         {/* Logo area */}
         <div className="absolute inset-0 z-[1] flex items-center justify-center p-2 sm:p-3">
@@ -108,7 +67,7 @@ export function ChannelCard({ channel }: { channel: Channel }) {
         {/* LIVE / VIP badges */}
         <div className="absolute top-2.5 start-2.5 z-30 flex items-center gap-1.5">
           {channel.accessLevel === 'vip' && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/90 px-2.5 py-1 text-[10px] font-black text-white shadow-lg backdrop-blur-xl">
+            <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/90 px-2.5 py-1 text-[10px] font-black text-white shadow-lg">
               <LockKeyhole size={11} />
               VIP
             </span>
@@ -127,7 +86,7 @@ export function ChannelCard({ channel }: { channel: Channel }) {
           type="button"
           onClick={favClick}
           aria-label="Favorite"
-          className={`absolute top-2.5 end-2.5 z-40 h-9 w-9 rounded-xl bg-black/55 backdrop-blur-xl border border-white/10 grid place-items-center text-slate-300 transition-all duration-200 hover:bg-black/75 hover:text-yellow-300 ${
+          className={`absolute top-2.5 end-2.5 z-40 h-9 w-9 rounded-xl bg-black/70 border border-white/10 grid place-items-center text-slate-300 transition-all duration-200 hover:bg-black/75 hover:text-yellow-300 ${
             fav ? 'text-yellow-300' : ''
           }`}
         >

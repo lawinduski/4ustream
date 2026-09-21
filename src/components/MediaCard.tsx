@@ -2,33 +2,17 @@
 
 import Link from 'next/link';
 import { Play, Star, LockKeyhole } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import type { MediaItem } from '@/lib/types';
-import { readLocalFavorites, toggleFavorite } from '@/lib/favorites';
-import { useApp } from './AppProvider';
+import { useFavorites } from './FavoritesProvider';
 
 export function MediaCard({ item }: { item: MediaItem }) {
-  const { user } = useApp();
-  const [fav, setFav] = useState(false);
-
-  useEffect(() => {
-    const sync = () => setFav(readLocalFavorites().some((x) => x.id === item.id && x.type === 'media'));
-    sync();
-    window.addEventListener('4u-favorites-changed', sync);
-    return () => window.removeEventListener('4u-favorites-changed', sync);
-  }, [item.id]);
-
-  useEffect(() => {
-    if (!user) return;
-    import('@/lib/favorites')
-      .then(({ getFavorites }) => getFavorites(user.uid).then((a) => setFav(a.some((x) => x.id === item.id && x.type === 'media'))).catch(() => {}));
-  }, [user, item.id]);
+  const { isFavorite, toggle } = useFavorites();
+  const fav = isFavorite(item.id, 'media');
 
   const favClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    const next = await toggleFavorite(user?.uid, { id: item.id, type: 'media', title: item.title, image: item.poster });
-    setFav(next);
+    await toggle({ id: item.id, type: 'media', title: item.title, image: item.poster });
   };
 
   return (
@@ -63,7 +47,7 @@ export function MediaCard({ item }: { item: MediaItem }) {
           <p className="text-xs text-slate-400 mt-2 line-clamp-2">{item.description}</p>
         </div>
       </Link>
-      <button onClick={favClick} className={`absolute top-2 end-2 z-10 p-2 rounded-xl bg-black/50 backdrop-blur text-slate-200 ${fav ? 'text-yellow-300' : ''}`} aria-label="Favorite">
+      <button onClick={favClick} className={`absolute top-2 end-2 z-10 p-2 rounded-xl bg-black/65 text-slate-200 ${fav ? 'text-yellow-300' : ''}`} aria-label="Favorite">
         <Star size={16} fill={fav ? 'currentColor' : 'none'} />
       </button>
     </div>

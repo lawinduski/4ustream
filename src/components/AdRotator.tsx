@@ -1,9 +1,18 @@
 'use client';
 
 import { createPortal } from 'react-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { X, ExternalLink, Megaphone, ChevronLeft } from 'lucide-react';
 import type { AdBanner } from '@/lib/types';
+
+/*
+ * Popup timing.
+ * POPUP_REPEAT_MS = 0 shows a popup once per browser session, shortly after the page loads.
+ * Set it to a value such as 60_000 to re-show (and rotate) popups every minute instead.
+ */
+const POPUP_FIRST_DELAY_MS = 3000;
+const POPUP_REPEAT_MS = 0;
+const POPUP_SESSION_KEY = '4u-popup-shown';
 
 export function AdRotator({ ads }: { ads: AdBanner[] }) {
   const banners = useMemo(
@@ -21,6 +30,7 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
   const [open, setOpen] = useState(false);
   const [portalReady, setPortalReady] = useState(false);
   const [modalEntered, setModalEntered] = useState(false);
+  const openRef = useRef(false);
 
   useEffect(() => {
     setPortalReady(true);
@@ -37,12 +47,32 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
   }, [banners.length]);
 
   useEffect(() => {
+    openRef.current = open;
+  }, [open]);
+
+  useEffect(() => {
     if (!popups.length) return;
 
+    if (POPUP_REPEAT_MS <= 0) {
+      try {
+        if (sessionStorage.getItem(POPUP_SESSION_KEY)) return;
+      } catch {}
+
+      const id = window.setTimeout(() => {
+        try {
+          sessionStorage.setItem(POPUP_SESSION_KEY, '1');
+        } catch {}
+        setOpen(true);
+      }, POPUP_FIRST_DELAY_MS);
+
+      return () => window.clearTimeout(id);
+    }
+
     const id = window.setInterval(() => {
+      if (openRef.current) return;
       setPopupIndex((i) => (i + 1) % popups.length);
       setOpen(true);
-    }, 5000);
+    }, POPUP_REPEAT_MS);
 
     return () => window.clearInterval(id);
   }, [popups.length]);
@@ -69,7 +99,7 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
 
     body.style.overflow = 'hidden';
     body.style.position = 'fixed';
-    body.style.top = '-${scrollY}px';
+    body.style.top = `-${scrollY}px`;
     body.style.width = '100%';
     html.style.overflow = 'hidden';
 
@@ -117,7 +147,7 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
             className={[
               'fixed inset-0 z-[99999]',
               'flex items-center justify-center',
-              'bg-black/70 backdrop-blur-md',
+              'bg-black/80',
               'px-4 py-4',
               'pt-[max(1rem,env(safe-area-inset-top))]',
               'pb-[max(1rem,env(safe-area-inset-bottom))]',
@@ -153,7 +183,7 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
                 type="button"
                 onClick={closePopup}
                 aria-label="Close"
-                className="absolute top-3 end-3 z-20 h-10 w-10 rounded-full bg-black/60 backdrop-blur-xl border border-white/10 grid place-items-center text-white transition hover:bg-black/80 active:scale-95"
+                className="absolute top-3 end-3 z-20 h-10 w-10 rounded-full bg-black/60 border border-white/10 grid place-items-center text-white transition hover:bg-black/80 active:scale-95"
               >
                 <X size={18} />
               </button>
@@ -237,19 +267,19 @@ export function AdRotator({ ads }: { ads: AdBanner[] }) {
 
             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent pointer-events-none" />
 
-            <div className="absolute bottom-3 start-3 inline-flex items-center gap-2 rounded-full bg-black/55 backdrop-blur-xl border border-white/10 px-3 py-1.5 text-[11px] font-bold">
+            <div className="absolute bottom-3 start-3 inline-flex items-center gap-2 rounded-full bg-black/55 border border-white/10 px-3 py-1.5 text-[11px] font-bold">
               <Megaphone size={13} />
               {ad.title}
             </div>
 
-            <div className="absolute bottom-3 end-3 inline-flex items-center gap-1 rounded-full bg-white/10 backdrop-blur-xl px-3 py-1.5 text-[10px]">
+            <div className="absolute bottom-3 end-3 inline-flex items-center gap-1 rounded-full bg-white/10 px-3 py-1.5 text-[10px]">
               Open
               <ChevronLeft size={13} />
             </div>
           </a>
 
           {banners.length > 1 && (
-            <div className="absolute top-3 end-3 rounded-full bg-black/50 backdrop-blur-xl border border-white/10 px-2.5 py-1 text-[10px]">
+            <div className="absolute top-3 end-3 rounded-full bg-black/50 border border-white/10 px-2.5 py-1 text-[10px]">
               {index + 1}/{banners.length}
             </div>
           )}
