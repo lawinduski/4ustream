@@ -1,17 +1,48 @@
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
-import type { Channel, DramaEpisode, MediaItem } from '@/lib/types';
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  where,
+} from 'firebase/firestore';
 
-type ContentList = Channel[] | MediaItem[] | DramaEpisode[];
+import { db } from '@/lib/firebase';
+
+import type {
+  Channel,
+  DramaEpisode,
+  MediaItem,
+} from '@/lib/types';
+
+type ContentList =
+  | Channel[]
+  | MediaItem[]
+  | DramaEpisode[];
 
 const listCache = new Map<string, ContentList>();
-const listPromises = new Map<string, Promise<ContentList>>();
 
-const itemCache = new Map<string, MediaItem | DramaEpisode | null>();
-const itemPromises = new Map<string, Promise<MediaItem | DramaEpisode | null>>();
+const listPromises = new Map<
+  string,
+  Promise<ContentList>
+>();
 
-function listKey(type: 'channels' | 'media', activeOnly: boolean, vip: boolean) {
-  return '${type}:${activeOnly ? 1 : 0}:${vip ? 1 : 0}';
+const itemCache = new Map<
+  string,
+  MediaItem | DramaEpisode | null
+>();
+
+const itemPromises = new Map<
+  string,
+  Promise<MediaItem | DramaEpisode | null>
+>();
+
+function listKey(
+  type: 'channels' | 'media',
+  activeOnly: boolean,
+  vip: boolean
+) {
+  return ${type}:${activeOnly ? 1 : 0}:${vip ? 1 : 0};
 }
 
 export function clearContentCache() {
@@ -28,26 +59,40 @@ export async function getChannels(
   const key = listKey('channels', activeOnly, vip);
 
   const cached = listCache.get(key);
-  if (cached) return cached as Channel[];
+
+  if (cached) {
+    return cached as Channel[];
+  }
 
   const pending = listPromises.get(key);
-  if (pending) return pending as Promise<Channel[]>;
+
+  if (pending) {
+    return pending as Promise<Channel[]>;
+  }
 
   const ref = collection(db, 'channels');
 
   const constraints = activeOnly
     ? [
         where('enabled', '==', true),
-        ...(vip ? [] : [where('accessLevel', '==', 'free')]),
+        ...(vip
+          ? []
+          : [where('accessLevel', '==', 'free')]),
       ]
     : [];
 
   const request = getDocs(
-    constraints.length ? query(ref, ...constraints) : ref
+    constraints.length
+      ? query(ref, ...constraints)
+      : ref
   )
     .then((snap) => {
       const result = snap.docs.map(
-        (d) => ({ id: d.id, ...d.data() } as Channel)
+        (d) =>
+          ({
+            id: d.id,
+            ...d.data(),
+          }) as Channel
       );
 
       listCache.set(key, result);
@@ -72,26 +117,40 @@ export async function getMedia(
   const key = listKey('media', activeOnly, vip);
 
   const cached = listCache.get(key);
-  if (cached) return cached as MediaItem[];
+
+  if (cached) {
+    return cached as MediaItem[];
+  }
 
   const pending = listPromises.get(key);
-  if (pending) return pending as Promise<MediaItem[]>;
+
+  if (pending) {
+    return pending as Promise<MediaItem[]>;
+  }
 
   const ref = collection(db, 'media');
 
   const constraints = activeOnly
     ? [
         where('enabled', '==', true),
-        ...(vip ? [] : [where('accessLevel', '==', 'free')]),
+        ...(vip
+          ? []
+          : [where('accessLevel', '==', 'free')]),
       ]
     : [];
 
   const request = getDocs(
-    constraints.length ? query(ref, ...constraints) : ref
+    constraints.length
+      ? query(ref, ...constraints)
+      : ref
   )
     .then((snap) => {
       const result = snap.docs.map(
-        (d) => ({ id: d.id, ...d.data() } as MediaItem)
+        (d) =>
+          ({
+            id: d.id,
+            ...d.data(),
+          }) as MediaItem
       );
 
       listCache.set(key, result);
@@ -124,10 +183,15 @@ export async function getMediaById(
     return pending as Promise<MediaItem | null>;
   }
 
-  const request = getDoc(doc(db, 'media', id))
+  const request = getDoc(
+    doc(db, 'media', id)
+  )
     .then((snap) => {
       const result = snap.exists()
-        ? ({ id: snap.id, ...snap.data() } as MediaItem)
+        ? ({
+            id: snap.id,
+            ...snap.data(),
+          } as MediaItem)
         : null;
 
       itemCache.set(key, result);
@@ -159,8 +223,7 @@ export async function getEpisodes(
 
   const pending = listPromises.get(key);
 
-  if (pending) {
-    return pending as Promise<DramaEpisode[]>;
+  if (pending) {return pending as Promise<DramaEpisode[]>;
   }
 
   const ref = collection(db, 'episodes');
@@ -168,13 +231,22 @@ export async function getEpisodes(
   const constraints = [
     where('dramaId', '==', dramaId),
     where('enabled', '==', true),
-    ...(vip ? [] : [where('accessLevel', '==', 'free')]),
+    ...(vip
+      ? []
+      : [where('accessLevel', '==', 'free')]),
   ];
 
-  const request = getDocs(query(ref, ...constraints))
-    .then((snap) => {const result = snap.docs
+  const request = getDocs(
+    query(ref, ...constraints)
+  )
+    .then((snap) => {
+      const result = snap.docs
         .map(
-          (d) => ({ id: d.id, ...d.data() } as DramaEpisode)
+          (d) =>
+            ({
+              id: d.id,
+              ...d.data(),
+            }) as DramaEpisode
         )
         .sort(
           (a, b) =>
@@ -212,10 +284,15 @@ export async function getEpisodeById(
     return pending as Promise<DramaEpisode | null>;
   }
 
-  const request = getDoc(doc(db, 'episodes', id))
+  const request = getDoc(
+    doc(db, 'episodes', id)
+  )
     .then((snap) => {
       const result = snap.exists()
-        ? ({ id: snap.id, ...snap.data() } as DramaEpisode)
+        ? ({
+            id: snap.id,
+            ...snap.data(),
+          } as DramaEpisode)
         : null;
 
       itemCache.set(key, result);
