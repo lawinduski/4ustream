@@ -42,7 +42,7 @@ function listKey(
   activeOnly: boolean,
   vip: boolean
 ) {
-  return ${type}:${activeOnly ? 1 : 0}:${vip ? 1 : 0};
+  return '${type}:${activeOnly ? 1 : 0}:${vip ? 1 : 0}';
 }
 
 export function clearContentCache() {
