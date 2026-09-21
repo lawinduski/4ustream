@@ -11,7 +11,7 @@ const itemCache = new Map<string, MediaItem | DramaEpisode | null>();
 const itemPromises = new Map<string, Promise<MediaItem | DramaEpisode | null>>();
 
 function listKey(type: 'channels' | 'media', activeOnly: boolean, vip: boolean) {
-  return ${type}:${activeOnly ? 1 : 0}:${vip ? 1 : 0};
+  return '${type}:${activeOnly ? 1 : 0}:${vip ? 1 : 0}';
 }
 
 export function clearContentCache() {
