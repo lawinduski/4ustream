@@ -30,23 +30,21 @@ export function StreamPlayer({
   */
 
   useEffect(() => {
-    if (!url) return;
-    if (playerType === 'iframe') return;
+  if (!url || playerType === 'iframe') return;
 
-    if (
-      typeof window === 'undefined' ||
-      !('mediaSession' in navigator)
-    ) {
-      return;
-    }
+  if (
+    typeof navigator === 'undefined' ||
+    !('mediaSession' in navigator)
+  ) {
+    return;
+  }
 
-    const mediaSession = navigator.mediaSession;
-
+  const updateMediaSession = () => {
     try {
-      mediaSession.metadata = new MediaMetadata({
-        title: title || '4uStream',
-        artist: '4uStream',
-        album: '4uStream • Live TV',
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: '4uStream',
+        artist: title || 'Live TV',
+        album: '4uStream',
         artwork: [
           {
             src: '/IMG_6501.jpeg',
@@ -60,21 +58,21 @@ export function StreamPlayer({
           },
         ],
       });
-
-      mediaSession.playbackState = 'none';
     } catch {
-      // Media Session is optional.
+      // Ignore Media Session errors.
     }
+  };
 
-    return () => {
-      try {
-        mediaSession.metadata = null;
-        mediaSession.playbackState = 'none';
-      } catch {
-        // Ignore unsupported Media Session behavior.
-      }
-    };
-  }, [url, title, playerType]);
+  updateMediaSession();
+
+  return () => {
+    try {
+      navigator.mediaSession.metadata = null;
+    } catch {
+      // Ignore cleanup errors.
+    }
+  };
+}, [url, title, playerType]);
 
   /*
   |--------------------------------------------------------------------------
