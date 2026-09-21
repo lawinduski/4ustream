@@ -2,16 +2,16 @@
 
 import Link from 'next/link';
 import { LockKeyhole, Play, Star, Radio } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import type { Channel } from '@/lib/types';
 import {
+  isRemoteFavorite,
   readLocalFavorites,
   toggleFavorite,
-  getFavorites,
 } from '@/lib/favorites';
 import { useApp } from './AppProvider';
 
-export function ChannelCard({ channel }: { channel: Channel }) {
+export const ChannelCard = memo(function ChannelCard({ channel }: { channel: Channel }) {
   const { user } = useApp();
   const [fav, setFav] = useState(false);
   const [logoError, setLogoError] = useState(false);
@@ -21,35 +21,32 @@ export function ChannelCard({ channel }: { channel: Channel }) {
   }, [channel.logo]);
 
   useEffect(() => {
+    let active = true;
+
     const sync = () => {
-      setFav(
-        readLocalFavorites().some(
-          (x) => x.id === channel.id && x.type === 'channel'
-        )
-      );
+      if (!user) {
+        setFav(
+          readLocalFavorites().some(
+            (x) => x.id === channel.id && x.type === 'channel'
+          )
+        );
+        return;
+      }
+
+      isRemoteFavorite(user.uid, { id: channel.id, type: 'channel' })
+        .then(value => {
+          if (active) setFav(value);
+        })
+        .catch(() => {});
     };
 
     sync();
-
     window.addEventListener('4u-favorites-changed', sync);
 
     return () => {
+      active = false;
       window.removeEventListener('4u-favorites-changed', sync);
     };
-  }, [channel.id]);
-
-  useEffect(() => {
-    if (!user) return;
-
-    getFavorites(user.uid)
-      .then((a) =>
-        setFav(
-          a.some(
-            (x) => x.id === channel.id && x.type === 'channel'
-          )
-        )
-      )
-      .catch(() => {});
   }, [user, channel.id]);
 
   const favClick = async (e: React.MouseEvent) => {
@@ -165,4 +162,4 @@ export function ChannelCard({ channel }: { channel: Channel }) {
       </div>
     </article>
   );
-}
+});
