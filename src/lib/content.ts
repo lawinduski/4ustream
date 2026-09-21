@@ -171,13 +171,13 @@ export async function getMedia(
 export async function getMediaById(
   id: string
 ): Promise<MediaItem | null> {
-  const key = media:${id};
+  const key = 'media:' + id;
 
   if (itemCache.has(key)) {
     return itemCache.get(key) as MediaItem | null;
   }
 
-  const pending = itemPromises.get(key);
+  const pending = 'itemPromises.get(key)';
 
   if (pending) {
     return pending as Promise<MediaItem | null>;
@@ -213,7 +213,7 @@ export async function getEpisodes(
   dramaId: string,
   vip = false
 ): Promise<DramaEpisode[]> {
-  const key = episodes:${dramaId}:${vip ? 1 : 0};
+  const key = 'episodes:${dramaId}:${vip ? 1 : 0}';
 
   const cached = listCache.get(key);
 
@@ -272,7 +272,7 @@ export async function getEpisodes(
 export async function getEpisodeById(
   id: string
 ): Promise<DramaEpisode | null> {
-  const key = episode:${id};
+  const key = 'episode:' + id;
 
   if (itemCache.has(key)) {
     return itemCache.get(key) as DramaEpisode | null;
