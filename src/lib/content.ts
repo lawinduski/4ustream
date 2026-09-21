@@ -180,7 +180,7 @@ export async function getMediaById(
   const pending = 'itemPromises.get(key)';
 
   if (pending) {
-    return pending as Promise<MediaItem | null>;
+    return pending as unknown as Promise<MediaItem | null>;
   }
 
   const request = getDoc(
