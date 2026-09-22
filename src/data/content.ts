@@ -1,4 +1,15 @@
-import type { MediaItem } from '@/lib/types';
+export type MediaItem = {
+  id: string;
+  title: string;
+  type: 'film' | 'drama';
+  year: number;
+  genre: string;
+  description: string;
+  poster: string;
+  streamUrl?: string;
+  playerType?: 'video' | 'hls' | 'iframe';
+  enabled?: boolean;
+};
 
 export const media: MediaItem[] = [
   { id: 'film-01', title: '4uStream Cinema', type: 'film', year: 2026, genre: 'Featured', description: 'A placeholder catalog item. Replace with content you are licensed to distribute.', poster: 'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=900&q=80', enabled: false },

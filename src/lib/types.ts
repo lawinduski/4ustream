@@ -1,17 +1,6 @@
 export type UserStatus = 'pending' | 'active' | 'disabled';
-
 export type AccessLevel = 'free' | 'vip';
-
-export type Category =
-  | 'ALL'
-  | 'NEWS'
-  | 'SPORTS'
-  | 'BEIN'
-  | 'MOVIES'
-  | 'KIDS'
-  | 'KURDISH'
-  | 'ENTERTAINMENT';
-
+export type Category = 'ALL' | 'NEWS' | 'SPORTS' | 'BEIN' | 'MOVIES' | 'KIDS' | 'KURDISH' | 'ENTERTAINMENT';
 export type PlayerType = 'video' | 'hls' | 'iframe';
 
 export type Channel = {
@@ -26,19 +15,6 @@ export type Channel = {
   accessLevel?: AccessLevel;
 };
 
-export type MediaPart = {
-  id: string;
-  mediaId: string;
-  partNumber: number;
-  title: string;
-  durationMinutes?: number;
-  description?: string;
-  streamUrl: string;
-  playerType?: PlayerType;
-  enabled?: boolean;
-  accessLevel?: AccessLevel;
-};
-
 export type MediaItem = {
   id: string;
   title: string;
@@ -49,10 +25,21 @@ export type MediaItem = {
   poster: string;
   streamUrl?: string;
   playerType?: PlayerType;
-  parts?: MediaPart[];
   enabled?: boolean;
   accessLevel?: AccessLevel;
-  rating?: number;
+};
+
+export type FilmPart = {
+  id: string;
+  mediaId: string;
+  partNumber: number;
+  title?: string;
+  durationMinutes?: number;
+  description?: string;
+  streamUrl?: string;
+  playerType?: PlayerType;
+  enabled: boolean;
+  accessLevel?: AccessLevel;
 };
 
 export type DramaEpisode = {
@@ -87,8 +74,6 @@ export type Favorite = {
   createdAt?: unknown;
 };
 
-export type AdAudience = 'free' | 'vip' | 'both';
-
 export type AdBanner = {
   id: string;
   title: string;
@@ -96,8 +81,6 @@ export type AdBanner = {
   mobileImage?: string;
   link: string;
   placement?: 'banner' | 'popup' | 'inline';
-  audience?: AdAudience;
-  repeatSeconds?: number;
   enabled: boolean;
   order: number;
   createdAt?: unknown;

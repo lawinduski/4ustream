@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
 import {
   createUserWithEmailAndPassword,
-  sendEmailVerification,
   updateProfile,
 } from 'firebase/auth';
 import {
@@ -53,6 +52,24 @@ export default function Signup() {
         displayName: name,
       });
 
+      const verificationResponse = await fetch(
+        '/api/send-verification',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: c.user.email,
+          }),
+        },
+      );
+
+if (!verificationResponse.ok) {
+  throw new Error(
+    'Could not send verification email.',
+  );
+}
       await setDoc(
         doc(db, 'users', c.user.uid),
         {
@@ -60,21 +77,14 @@ export default function Signup() {
           name,
           email,
           status: 'active',
-          plan: 'free',
           createdAt: serverTimestamp(),
         },
       );
 
-      await sendEmailVerification(c.user, {
-        url: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth-action`,
-        handleCodeInApp: true,
-      });
-
       router.push('/account');
-    } catch (err: unknown) {
-      const code = err instanceof Error ? err.message : '';
+    } catch (err: any) {
       setError(
-        code.includes('email-already')
+        err?.message?.includes('email-already')
           ? 'This email is already registered.'
           : 'Could not create the account.',
       );
@@ -95,7 +105,7 @@ export default function Signup() {
         </h1>
 
         <p className="text-slate-400 mt-1">
-          Verify your email to access the platform. VIP access can be managed by the administrator.
+          Your account is ready immediately. VIP access can be managed by the administrator.
         </p>
 
         <form

@@ -19,7 +19,7 @@ import { useApp } from '@/components/AppProvider';
 type RecentItem = { id: string; type: 'media' | 'episode'; title: string; image?: string; watchedAt: number };
 
 export default function Home() {
-  const { t, isVip, user, canWatch } = useApp();
+  const { t, isVip, user } = useApp();
   const [channels, setChannels] = useState<Channel[]>([]);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [ads, setAds] = useState<AdBanner[]>([]);
@@ -27,11 +27,7 @@ export default function Home() {
 
   useEffect(() => {
     let mounted = true;
-    Promise.all([
-      getChannels(true, isVip, 12),
-      getMedia(true, isVip, 24),
-      canWatch ? getAds(true, isVip ? 'vip' : 'free', 8).catch(() => []) : Promise.resolve([]),
-    ])
+    Promise.all([getChannels(true, isVip), getMedia(true, isVip), getAds(true)])
       .then(([cs, ms, as]) => {
         if (!mounted) return;
         setChannels(cs);
@@ -42,7 +38,7 @@ export default function Home() {
         console.error('4uStream content loading error:', error);
       });
     return () => { mounted = false; };
-  }, [isVip, canWatch]);
+  }, [isVip]);
 
   useEffect(() => {
     const loadRecent = () => {
@@ -62,7 +58,7 @@ export default function Home() {
   const dramas = useMemo(() => media.filter((x) => x.type === 'drama'), [media]);
   const featured = films[0] || dramas[0];
   const vipItems = useMemo(() => media.filter((x) => x.accessLevel === 'vip'), [media]);
-  const topRated = useMemo(() => [...media].sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0)), [media]);
+  const topRated = useMemo(() => [...media].sort((a: any, b: any) => (Number(b.rating) || 0) - (Number(a.rating) || 0)), [media]);
   const newest = useMemo(() => [...media].sort((a, b) => b.year - a.year), [media]);
   const recentMedia = useMemo(() => recent.map((r) => media.find((m) => m.id === r.id)).filter(Boolean) as MediaItem[], [recent, media]);
 
@@ -72,7 +68,7 @@ export default function Home() {
         {ads.length > 0 && <AdRotator ads={ads} />}
 
         <section className="hero-premium hero-cinema">
-          {featured?.poster && <img src={featured.poster} alt="" className="hero-backdrop" aria-hidden="true" loading="lazy" decoding="async" />}
+          {featured?.poster && <img src={featured.poster} alt="" className="hero-backdrop" aria-hidden="true" />}
           <div className="hero-backdrop-shade" />
           <div className="hero-grid" />
           <div className="hero-glow hero-glow-a" />
@@ -97,7 +93,7 @@ export default function Home() {
             </div>
             {featured && (
               <Link href={`/watch?media=${encodeURIComponent(featured.id)}`} className="hero-poster-card hidden lg:block">
-                <img src={featured.poster} alt={featured.title} loading="lazy" decoding="async" />
+                <img src={featured.poster} alt={featured.title} loading="eager" />
                 <div><span>{featured.type === 'drama' ? 'DRAMA' : 'FILM'}</span><b>{featured.year}</b></div>
               </Link>
             )}

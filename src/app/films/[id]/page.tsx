@@ -7,19 +7,19 @@ import { PageShell } from '@/components/PageShell';
 import { Protected } from '@/components/Protected';
 import { getFilmParts, getMediaById } from '@/lib/content';
 import { useApp } from '@/components/AppProvider';
-import type { MediaPart, MediaItem } from '@/lib/types';
+import type { FilmPart, MediaItem } from '@/lib/types';
 
 export default function FilmDetails() {
   const { isVip } = useApp();
   const params = useParams<{ id: string }>();
   const id = decodeURIComponent(params.id);
   const [film, setFilm] = useState<MediaItem | null>(null);
-  const [parts, setParts] = useState<MediaPart[]>([]);
+  const [parts, setParts] = useState<FilmPart[]>([]);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    getMediaById(id, isVip).then(setFilm).catch(() => {});
-  }, [id, isVip]);
+    getMediaById(id).then(setFilm).catch(() => {});
+  }, [id]);
 
   useEffect(() => {
     getFilmParts(id, isVip)

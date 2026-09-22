@@ -196,17 +196,3 @@ button,input { font:inherit; }
   }
   :where(.light select) option { background-color: #ffffff; color: #0f172a; }
 }
-
-/* Mobile performance safeguards: keep the visual language, remove expensive GPU work on touch devices. */
-@media (hover: none), (max-width: 700px) {
-  .animated-bg { display: none; }
-  .glass-header, .mobile-menu { -webkit-backdrop-filter: none; backdrop-filter: none; }
-  .hero-backdrop { opacity: .08; filter: none; transform: none; }
-  .hero-glow-a, .hero-glow-b { opacity: .12; }
-  .hero-premium { box-shadow: 0 16px 45px rgba(0,0,0,.16); }
-  .card-hover, .quick-card, .icon-btn, .nav-pill { transition-duration: .12s; }
-}
-@media (max-width: 520px) {
-  .home-stage { gap: 24px; }
-  .hero-grid { display: none; }
-}

@@ -2,6 +2,7 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
+
     function signedIn() {
       return request.auth != null;
     }
@@ -18,7 +19,6 @@ service cloud.firestore {
 
     function activeUser() {
       return signedIn()
-        && request.auth.token.email_verified == true
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
     }
@@ -36,19 +36,8 @@ service cloud.firestore {
     function contentAllowed() {
       return activeUser()
         && (
-          !('accessLevel' in resource.data)
-          || resource.data.accessLevel != 'vip'
+          resource.data.accessLevel != 'vip'
           || vipUser()
-        );
-    }
-
-    function adAllowed() {
-      return activeUser()
-        && (
-          !('audience' in resource.data)
-          || resource.data.audience == 'both'
-          || (resource.data.audience == 'vip' && vipUser())
-          || (resource.data.audience == 'free' && !vipUser())
         );
     }
 
@@ -61,9 +50,7 @@ service cloud.firestore {
       allow create: if isOwner(uid)
         && request.resource.data.uid == uid
         && request.resource.data.status == 'active'
-        && request.resource.data.email == request.auth.token.email
-        && (!('plan' in request.resource.data) || request.resource.data.plan == 'free')
-        && (!('vipUntil' in request.resource.data) || request.resource.data.vipUntil == null);
+        && request.resource.data.email == request.auth.token.email;
 
       allow read: if isOwner(uid) || isAdmin();
 
@@ -71,9 +58,9 @@ service cloud.firestore {
         isOwner(uid)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.email == resource.data.email
+        && request.resource.data.status == 'active'
         && request.resource.data.plan == resource.data.plan
         && request.resource.data.vipUntil == resource.data.vipUntil
-        && request.resource.data.status == resource.data.status
       );
 
       allow delete: if isAdmin();
@@ -84,27 +71,37 @@ service cloud.firestore {
     }
 
     match /channels/{id} {
-      allow read: if isAdmin() || (contentAllowed() && resource.data.enabled == true);
+      allow read: if isAdmin()
+        || (contentAllowed() && resource.data.enabled == true);
+
       allow write: if isAdmin();
     }
 
     match /media/{id} {
-      allow read: if isAdmin() || (contentAllowed() && resource.data.enabled == true);
+      allow read: if isAdmin()
+        || (contentAllowed() && resource.data.enabled == true);
+
       allow write: if isAdmin();
     }
 
     match /episodes/{id} {
-      allow read: if isAdmin() || (contentAllowed() && resource.data.enabled == true);
+      allow read: if isAdmin()
+        || (contentAllowed() && resource.data.enabled == true);
+
       allow write: if isAdmin();
     }
 
     match /parts/{id} {
-      allow read: if isAdmin() || (contentAllowed() && resource.data.enabled == true);
+      allow read: if isAdmin()
+        || (contentAllowed() && resource.data.enabled == true);
+
       allow write: if isAdmin();
     }
 
     match /ads/{id} {
-      allow read: if isAdmin() || adAllowed();
+      allow read: if isAdmin()
+        || resource.data.enabled == true;
+
       allow write: if isAdmin();
     }
 
