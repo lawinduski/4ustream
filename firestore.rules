@@ -91,6 +91,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /parts/{id} {
+      allow read: if isAdmin()
+        || (contentAllowed() && resource.data.enabled == true);
+
+      allow write: if isAdmin();
+    }
+
     match /ads/{id} {
       allow read: if isAdmin()
         || resource.data.enabled == true;

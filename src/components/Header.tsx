@@ -8,6 +8,7 @@ import {
   Moon,
   UserRound,
   ShieldCheck,
+  Crown,
   Download,
   Menu,
   X,
@@ -32,6 +33,7 @@ export function Header() {
     install,
     lang,
     setLang,
+    isVip,
   } = useApp();
 
   const path = usePathname();
@@ -142,7 +144,7 @@ export function Header() {
                   href="/account"
                   className="account-header-btn inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl font-bold text-xs sm:text-sm"
                 >
-                  <UserRound size={17} />
+                  {isVip ? <Crown size={17} className="text-amber-300" /> : <UserRound size={17} />}
                   <span>{t('account')}</span>
                 </Link>
               ) : (

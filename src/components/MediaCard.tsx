@@ -18,7 +18,7 @@ export function MediaCard({ item }: { item: MediaItem }) {
   return (
     <div className="relative">
       <Link
-        href={item.type === 'drama' ? `/drama/${encodeURIComponent(item.id)}` : `/watch?media=${encodeURIComponent(item.id)}`}
+        href={item.type === 'drama' ? `/drama/${encodeURIComponent(item.id)}` : `/films/${encodeURIComponent(item.id)}`}
         className="block glass card-hover rounded-2xl overflow-hidden group"
       >
         <div className="relative aspect-[2/3] bg-slate-900 overflow-hidden media-art">

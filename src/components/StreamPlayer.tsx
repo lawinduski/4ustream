@@ -9,6 +9,8 @@ type Props = {
   title: string;
   playerType?: PlayerType;
   resumeKey?: string;
+  /** Live TV channel. Enables low-latency HLS; movies and episodes leave this off. */
+  live?: boolean;
 };
 
 export function StreamPlayer({
@@ -16,6 +18,7 @@ export function StreamPlayer({
   title,
   playerType = 'video',
   resumeKey,
+  live = false,
 }: Props) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const lastSaved = useRef(0);
@@ -276,7 +279,7 @@ export function StreamPlayer({
           if (Hls.isSupported()) {
             hls = new Hls({
               enableWorker: true,
-              lowLatencyMode: true,
+              lowLatencyMode: live, // low latency only makes sense for live channels
               backBufferLength: 30,
               maxBufferLength: 20,
               maxMaxBufferLength: 30,
@@ -415,7 +418,7 @@ export function StreamPlayer({
       video.removeAttribute('src');
       video.load();
     };
-  }, [url, playerType, resumeKey]);
+  }, [url, playerType, resumeKey, live]);
 
   /*
   |--------------------------------------------------------------------------

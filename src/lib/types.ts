@@ -29,6 +29,19 @@ export type MediaItem = {
   accessLevel?: AccessLevel;
 };
 
+export type FilmPart = {
+  id: string;
+  mediaId: string;
+  partNumber: number;
+  title?: string;
+  durationMinutes?: number;
+  description?: string;
+  streamUrl?: string;
+  playerType?: PlayerType;
+  enabled: boolean;
+  accessLevel?: AccessLevel;
+};
+
 export type DramaEpisode = {
   id: string;
   dramaId: string;

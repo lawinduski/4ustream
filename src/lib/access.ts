@@ -15,3 +15,13 @@ export function isVip(profile?: UserProfile | null) {
 export function canAccess(level: 'free' | 'vip' | undefined, profile?: UserProfile | null) {
   return level !== 'vip' || isVip(profile);
 }
+
+export function formatVipUntil(value: unknown) {
+  try {
+    const v: any = value;
+    const d: Date = v instanceof Timestamp ? v.toDate() : v?.toDate ? v.toDate() : new Date(v);
+    return !Number.isNaN(d.getTime()) ? d.toLocaleDateString() : '';
+  } catch {
+    return '';
+  }
+}
