@@ -28,11 +28,15 @@ export type Channel = {
 
 export type MediaPart = {
   id: string;
+  mediaId: string;
+  partNumber: number;
   title: string;
+  durationMinutes?: number;
+  description?: string;
   streamUrl: string;
   playerType?: PlayerType;
-  durationMinutes?: number;
   enabled?: boolean;
+  accessLevel?: AccessLevel;
 };
 
 export type MediaItem = {
@@ -43,16 +47,12 @@ export type MediaItem = {
   genre: string;
   description: string;
   poster: string;
-
-  // Old one-part films remain supported.
   streamUrl?: string;
   playerType?: PlayerType;
-
-  // New: Part 1, Part 2, Part 3...
   parts?: MediaPart[];
-
   enabled?: boolean;
   accessLevel?: AccessLevel;
+  rating?: number;
 };
 
 export type DramaEpisode = {
@@ -95,18 +95,11 @@ export type AdBanner = {
   image: string;
   mobileImage?: string;
   link: string;
-
   placement?: 'banner' | 'popup' | 'inline';
-
-  // Who can see this advertisement.
   audience?: AdAudience;
-
-  // Repeat interval in seconds.
   repeatSeconds?: number;
-
   enabled: boolean;
   order: number;
-
   createdAt?: unknown;
   updatedAt?: unknown;
 };

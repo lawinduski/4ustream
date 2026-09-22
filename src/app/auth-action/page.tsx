@@ -27,7 +27,7 @@ export default function AuthActionPage() {
         }
 
         await applyActionCode(auth, oobCode);
-
+        await auth.currentUser?.reload();
         setStatus('success');
       } catch (error) {
         console.error(

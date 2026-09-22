@@ -16,7 +16,6 @@ export function localFavorite(id: string, value: Favorite) {
   const exists = current.some(x => x.id === id && x.type === value.type);
   const next = exists ? current.filter(x => !(x.id === id && x.type === value.type)) : [{ ...value, createdAt: Date.now() }, ...current];
   localStorage.setItem(KEY, JSON.stringify(next));
-  window.dispatchEvent(new Event('4u-favorites-changed'));
   return !exists;
 }
 
@@ -34,6 +33,5 @@ export async function toggleFavorite(uid: string | undefined, value: Favorite): 
   const exists = current.exists();
   if (exists) await deleteDoc(ref);
   else await setDoc(ref, { ...value, createdAt: serverTimestamp() });
-  window.dispatchEvent(new Event('4u-favorites-changed'));
   return !exists;
 }

@@ -37,7 +37,7 @@ npm run dev
 
 ## Production
 
-Set the same environment variables in Vercel, deploy the repository, and publish the Firestore rules from `firestore.rules` with the Firebase CLI. The project has not been build-tested in this environment because dependency installation was unavailable.
+Set the same environment variables in Vercel, deploy the repository, and publish the Firestore rules from `firestore.rules` with the Firebase CLI. Build validation is performed locally/CI with `npm run build`; this source archive does not contain installed dependencies.
 
 
 ## V5 UI / Media Studio updates

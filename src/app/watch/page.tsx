@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { PageShell } from '@/components/PageShell';
 import { Protected } from '@/components/Protected';
 import { getEpisodeById, getFilmPartById, getFilmParts, getMediaById } from '@/lib/content';
-import type { DramaEpisode, FilmPart, MediaItem } from '@/lib/types';
+import type { DramaEpisode, MediaPart, MediaItem } from '@/lib/types';
 import { StreamPlayer } from '@/components/StreamPlayer';
 import { useApp } from '@/components/AppProvider';
 import { canAccess } from '@/lib/access';
+
+type RecentEntry = { id: string; type: 'media' | 'episode'; title: string; image?: string; watchedAt: number };
 
 function WatchInner() {
   const params = useSearchParams();
@@ -19,21 +21,21 @@ function WatchInner() {
   const { profile, isVip } = useApp();
   const [item, setItem] = useState<MediaItem | null>(null);
   const [episode, setEpisode] = useState<DramaEpisode | null>(null);
-  const [part, setPart] = useState<FilmPart | null>(null);
-  const [siblingParts, setSiblingParts] = useState<FilmPart[]>([]);
+  const [part, setPart] = useState<MediaPart | null>(null);
+  const [siblingParts, setSiblingParts] = useState<MediaPart[]>([]);
 
   useEffect(() => {
-    if (mediaId) getMediaById(mediaId).then(setItem).catch(() => {});
-    if (episodeId) getEpisodeById(episodeId).then(setEpisode).catch(() => {});
-  }, [mediaId, episodeId]);
+    if (mediaId) getMediaById(mediaId, isVip).then(setItem).catch(() => {});
+    if (episodeId) getEpisodeById(episodeId, isVip).then(setEpisode).catch(() => {});
+  }, [mediaId, episodeId, isVip]);
 
   useEffect(() => {
     if (!partId) {
       setPart(null);
       return;
     }
-    getFilmPartById(partId).then(setPart).catch(() => setPart(null));
-  }, [partId]);
+    getFilmPartById(partId, isVip).then(setPart).catch(() => setPart(null));
+  }, [partId, isVip]);
 
   // Only needed to show Part 1 / Part 2 navigation when this film has more than one part.
   useEffect(() => {
@@ -56,10 +58,10 @@ function WatchInner() {
     if (!titleNow) return;
     try {
       const key = '4u-recent-watching';
-      const old = JSON.parse(localStorage.getItem(key) || '[]');
-      const next = [
+      const old = JSON.parse(localStorage.getItem(key) || '[]') as RecentEntry[];
+      const next: RecentEntry[] = [
         { id: recentId, type, title: titleNow, image: imageNow, watchedAt: Date.now() },
-        ...old.filter((x: any) => !(x.id === recentId && x.type === type)),
+        ...old.filter((entry) => !(entry.id === recentId && entry.type === type)),
       ].slice(0, 12);
       localStorage.setItem(key, JSON.stringify(next));
       window.dispatchEvent(new Event('4u-recent-watching-changed'));
