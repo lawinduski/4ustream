@@ -50,6 +50,7 @@ export type DramaEpisode = {
   episodeNumber: number;
   durationMinutes?: number;
   description?: string;
+  thumbnail?: string;
   streamUrl?: string;
   playerType?: PlayerType;
   enabled: boolean;

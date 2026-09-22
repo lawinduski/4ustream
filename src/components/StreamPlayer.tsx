@@ -151,7 +151,7 @@ export function StreamPlayer({
 
       try {
         localStorage.setItem(
-          '4u-progress:${resumeKey}',
+          `4u-progress:${resumeKey}`,
           String(Math.floor(video.currentTime))
         );
       } catch {

@@ -125,6 +125,7 @@ export function Header() {
                     }
                   >
                     <option value="badini">Badini</option>
+                    <option value="sorani">سۆرانی</option>
                     <option value="en">English</option>
                     <option value="ar">العربية</option>
                   </select>
@@ -193,7 +194,7 @@ export function Header() {
                 </Link>
               ))}
 
-              <div className="grid grid-cols-3 gap-2 pt-2">
+              <div className="grid grid-cols-4 gap-2 pt-2">
                 <button
                   onClick={() => {
                     setLang('badini');
@@ -202,6 +203,16 @@ export function Header() {
                   className="language-btn"
                 >
                   Badini
+                </button>
+
+                <button
+                  onClick={() => {
+                    setLang('sorani');
+                    setOpen(false);
+                  }}
+                  className="language-btn"
+                >
+                  سۆرانی
                 </button>
 
                 <button

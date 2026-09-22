@@ -17,7 +17,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   useEffect(()=>{ const saved=localStorage.getItem('4u-lang') as Lang|null; if(saved) setLangState(saved); const th=localStorage.getItem('4u-theme') as Theme|null; if(th) setThemeState(th);
     const handler=(e:Event)=>{ e.preventDefault(); setDeferred(e); }; window.addEventListener('beforeinstallprompt',handler); return()=>window.removeEventListener('beforeinstallprompt',handler);
   },[]);
-  useEffect(()=>{ document.documentElement.classList.toggle('light',theme==='light'); document.documentElement.dir=(lang==='en'?'ltr':'rtl'); document.documentElement.lang=lang==='badini'?'ku':lang; localStorage.setItem('4u-lang',lang); localStorage.setItem('4u-theme',theme); },[lang,theme]);
+  useEffect(()=>{ document.documentElement.classList.toggle('light',theme==='light'); document.documentElement.dir=(lang==='en'?'ltr':'rtl'); document.documentElement.lang=lang==='badini'?'ku':lang==='sorani'?'ckb':lang; localStorage.setItem('4u-lang',lang); localStorage.setItem('4u-theme',theme); },[lang,theme]);
   const refreshProfile=async()=>{ if(!auth.currentUser){setProfile(null);return;} const snap=await getDoc(doc(db,'users',auth.currentUser.uid)); setProfile(snap.exists()?snap.data() as UserProfile:null); };
   useEffect(()=>onAuthStateChanged(auth,async(u)=>{ setUser(u); if(u){ const snap=await getDoc(doc(db,'users',u.uid)); setProfile(snap.exists()?snap.data() as UserProfile:null); } else setProfile(null); setLoading(false); }),[]);
   const setLang=(l:Lang)=>setLangState(l); const setTheme=(t:Theme)=>setThemeState(t); const t=(key:keyof typeof translations.en)=>translations[lang][key] ?? translations.en[key];
