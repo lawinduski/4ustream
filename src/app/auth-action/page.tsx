@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import  Link  from 'next/link';
-import { applyActionCode, reload } from 'firebase/auth';
+import { applyActionCode } from 'firebase/auth';
 import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
 
-import { auth, db } from '@/lib/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
+import { auth } from '@/lib/firebase';
 
 export default function AuthActionPage() {
   const [status, setStatus] = useState<
@@ -28,15 +27,6 @@ export default function AuthActionPage() {
         }
 
         await applyActionCode(auth, oobCode);
-
-        // If the user opened the link while signed in on this device,
-        // refresh Firebase Auth and activate the profile immediately.
-        if (auth.currentUser) {
-          await reload(auth.currentUser);
-          await auth.currentUser.getIdToken(true);
-          const profileRef = doc(db, 'users', auth.currentUser.uid);
-          await updateDoc(profileRef, { status: 'active' });
-        }
 
         setStatus('success');
       } catch (error) {
