@@ -1,15 +1,16 @@
 'use client';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ArrowLeft, ChevronLeft, ChevronRight, LockKeyhole, ShieldAlert } from 'lucide-react';
 import Link from 'next/link';
 import { PageShell } from '@/components/PageShell';
 import { Protected } from '@/components/Protected';
-import { getEpisodeById, getFilmPartById, getFilmParts, getMediaById } from '@/lib/content';
+import { getEpisodeById, getEpisodes, getFilmPartById, getFilmParts, getMediaById } from '@/lib/content';
 import type { DramaEpisode, FilmPart, MediaItem } from '@/lib/types';
 import { StreamPlayer } from '@/components/StreamPlayer';
 import { useApp } from '@/components/AppProvider';
 import { canAccess } from '@/lib/access';
+import { useBranding } from '@/components/BrandingProvider';
 
 function WatchInner() {
   const params = useSearchParams();
@@ -17,10 +18,12 @@ function WatchInner() {
   const episodeId = params.get('episode');
   const partId = params.get('part');
   const { profile, isVip } = useApp();
+  const branding = useBranding();
   const [item, setItem] = useState<MediaItem | null>(null);
   const [episode, setEpisode] = useState<DramaEpisode | null>(null);
   const [part, setPart] = useState<FilmPart | null>(null);
   const [siblingParts, setSiblingParts] = useState<FilmPart[]>([]);
+  const [episodes, setEpisodes] = useState<DramaEpisode[]>([]);
 
   useEffect(() => {
     if (mediaId) getMediaById(mediaId).then(setItem).catch(() => {});
@@ -34,6 +37,11 @@ function WatchInner() {
     }
     getFilmPartById(partId).then(setPart).catch(() => setPart(null));
   }, [partId]);
+
+  useEffect(() => {
+    if (!episodeId || !episode?.dramaId) { setEpisodes([]); return; }
+    getEpisodes(episode.dramaId, isVip).then(setEpisodes).catch(() => setEpisodes([]));
+  }, [episodeId, episode?.dramaId, isVip]);
 
   // Only needed to show Part 1 / Part 2 navigation when this film has more than one part.
   useEffect(() => {
@@ -78,6 +86,12 @@ function WatchInner() {
 
   const prevPart = part ? siblingParts.filter((p) => p.partNumber < part.partNumber).slice(-1)[0] : undefined;
   const nextPart = part ? siblingParts.filter((p) => p.partNumber > part.partNumber)[0] : undefined;
+  const currentEpisodeIndex = episode ? episodes.findIndex((x) => x.id === episode.id) : -1;
+  const nextEpisode = currentEpisodeIndex >= 0 ? episodes[currentEpisodeIndex + 1] : undefined;
+  const handleEnded = useCallback(() => {
+    if (nextPart) window.location.href = `/watch?media=${encodeURIComponent(mediaId || '')}&part=${encodeURIComponent(nextPart.id)}`;
+    else if (nextEpisode) window.location.href = `/watch?episode=${encodeURIComponent(nextEpisode.id)}&media=${encodeURIComponent(nextEpisode.dramaId)}`;
+  }, [nextPart, nextEpisode, mediaId]);
 
   return (
     <Protected>
@@ -93,6 +107,12 @@ function WatchInner() {
               title={title}
               playerType={part?.playerType || episode?.playerType || item?.playerType}
               resumeKey={part?.id || episode?.id || item?.id}
+              poster={episode?.thumbnail || item?.poster}
+              subtitles={part?.subtitles || episode?.subtitles || item?.subtitles || []}
+              skipIntroSeconds={part?.skipIntroSeconds ?? episode?.skipIntroSeconds ?? item?.skipIntroSeconds}
+              servers={part?.servers || episode?.servers || item?.servers || []}
+              logoUrl={branding.playerLogoUrl}
+              onEnded={handleEnded}
             />
             <div className="p-6 sm:p-8">
               <div className="text-xs text-violet-300 font-bold uppercase">
@@ -104,6 +124,12 @@ function WatchInner() {
               </div>
               <h1 className="text-3xl sm:text-4xl font-black mt-2">{title}</h1>
               <p className="text-slate-400 mt-4 leading-7">{part?.description || episode?.description || item?.description}</p>
+
+              {episode && nextEpisode && (
+                <div className="mt-6 flex flex-wrap gap-2">
+                  <Link href={`/watch?episode=${encodeURIComponent(nextEpisode.id)}&media=${encodeURIComponent(nextEpisode.dramaId)}`} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-slate-950 text-sm font-black">Next episode · S{nextEpisode.seasonNumber} E{nextEpisode.episodeNumber} <ChevronRight size={16} /></Link>
+                </div>
+              )}
 
               {part && siblingParts.length > 1 && (
                 <div className="mt-6 flex flex-wrap gap-2">

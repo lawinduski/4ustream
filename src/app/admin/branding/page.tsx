@@ -1,0 +1,20 @@
+'use client';
+import { useEffect, useState } from 'react';
+import { ArrowLeft, Save, ShieldCheck, Upload } from 'lucide-react';
+import Link from 'next/link';
+import { doc, getDoc } from 'firebase/firestore';
+import { PageShell } from '@/components/PageShell';
+import { Protected } from '@/components/Protected';
+import { useApp } from '@/components/AppProvider';
+import { db } from '@/lib/firebase';
+import { defaultBranding, getBranding, saveBranding, type BrandingConfig } from '@/lib/branding';
+import { uploadAdminAsset } from '@/lib/storage';
+
+type BrandingField = Exclude<keyof BrandingConfig, 'updatedAt'>;
+const fields: Array<[BrandingField,string,string]> = [
+ ['logoUrl','Main logo','branding/logo'], ['mobileLogoUrl','Mobile logo','branding/mobile'], ['faviconUrl','Favicon','branding/favicon'],
+ ['appIcon192Url','App icon 192','branding/app-192'], ['appIcon512Url','App icon 512','branding/app-512'], ['ogImageUrl','Social / OG image','branding/og'],
+ ['playerLogoUrl','Player logo','branding/player'], ['loadingLogoUrl','Loading logo','branding/loading'], ['defaultPosterUrl','Default poster','branding/poster'], ['defaultAvatarUrl','Default avatar','branding/avatar'],
+];
+function Asset({label,value,onChange,folder}:{label:string;value:string;onChange:(v:string)=>void;folder:string}) { const [busy,setBusy]=useState(false); return <div className="glass rounded-2xl p-4"><div className="font-bold text-sm">{label}</div><div className="mt-3 flex gap-2"><label className="upload-btn shrink-0"><Upload size={15}/>Upload<input className="hidden" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onChange={async e=>{const f=e.target.files?.[0];if(!f)return;if(f.size>8*1024*1024){alert('Max 8MB');return}setBusy(true);try{onChange(await uploadAdminAsset(f,folder))}catch(err:any){alert(err?.message||'Upload failed')}finally{setBusy(false)}}}/></label><input className="w-full rounded-xl px-3 py-2.5" value={value||''} onChange={e=>onChange(e.target.value)} placeholder="or paste image URL"/></div>{value&&<img src={value} alt={label} className="mt-3 h-20 w-full object-contain rounded-xl bg-black/20"/>}{busy&&<div className="text-xs text-slate-400 mt-2">Uploading…</div>}</div> }
+export default function BrandingAdmin(){ const {user}=useApp(); const [allowed,setAllowed]=useState(false); const [form,setForm]=useState<BrandingConfig>(defaultBranding); const [saving,setSaving]=useState(false); useEffect(()=>{if(user)getBranding().then(setForm)},[user]); useEffect(()=>{if(user)getDoc(doc(db,'admins',user.uid)).then(s=>setAllowed(s.exists()&&s.data()?.active===true))},[user]); const update=(k:keyof BrandingConfig,v:string)=>setForm(x=>({...x,[k]:v})); const save=async()=>{setSaving(true);try{await saveBranding(form);alert('Branding saved.');}catch(e:any){alert(e?.message||'Save failed')}finally{setSaving(false)}}; return <PageShell><Protected>{allowed?<div className="space-y-6 max-w-5xl mx-auto"><div className="admin-hero"><div><div className="eyebrow"><ShieldCheck size={14}/> BRANDING STUDIO</div><h1>Branding</h1><p>Change site identity without redeploying the website.</p></div><Link href="/admin" className="admin-secondary-btn"><ArrowLeft size={15}/> Admin</Link></div><div className="glass rounded-3xl p-5 grid sm:grid-cols-2 gap-3"><label><span className="text-xs text-slate-400 font-bold">Site name</span><input className="mt-1 w-full rounded-xl px-3 py-2.5" value={form.siteName} onChange={e=>update('siteName',e.target.value)}/></label><label><span className="text-xs text-slate-400 font-bold">Tagline</span><input className="mt-1 w-full rounded-xl px-3 py-2.5" value={form.tagline} onChange={e=>update('tagline',e.target.value)}/></label></div><div className="grid sm:grid-cols-2 gap-3">{fields.map(([k,l,f])=><Asset key={k} label={l} value={String(form[k]||'')} onChange={v=>update(k,v)} folder={f}/>)}</div><button onClick={save} disabled={saving} className="admin-primary-btn"><Save size={16}/>{saving?'Saving…':'Save branding'}</button></div>:<div className="min-h-[50vh] grid place-items-center text-slate-500">Admin access required.</div>}</Protected></PageShell> }

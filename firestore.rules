@@ -17,8 +17,13 @@ service cloud.firestore {
       return signedIn() && request.auth.uid == uid;
     }
 
-    function activeUser() {
+    function verifiedUser() {
       return signedIn()
+        && request.auth.token.email_verified == true;
+    }
+
+    function activeUser() {
+      return verifiedUser()
         && exists(/databases/$(database)/documents/users/$(request.auth.uid))
         && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.status == 'active';
     }
@@ -49,7 +54,7 @@ service cloud.firestore {
     match /users/{uid} {
       allow create: if isOwner(uid)
         && request.resource.data.uid == uid
-        && request.resource.data.status == 'active'
+        && request.resource.data.status == 'unverified'
         && request.resource.data.email == request.auth.token.email;
 
       allow read: if isOwner(uid) || isAdmin();
@@ -58,7 +63,13 @@ service cloud.firestore {
         isOwner(uid)
         && request.resource.data.uid == resource.data.uid
         && request.resource.data.email == resource.data.email
-        && request.resource.data.status == 'active'
+        && (
+          request.resource.data.status == resource.data.status
+          || (
+            (resource.data.status == 'unverified' || resource.data.status == 'pending')
+            && request.resource.data.status == 'active'
+            && request.auth.token.email_verified == true)
+        )
         && request.resource.data.plan == resource.data.plan
         && request.resource.data.vipUntil == resource.data.vipUntil
       );
@@ -68,6 +79,19 @@ service cloud.firestore {
 
     match /users/{uid}/favorites/{favoriteId} {
       allow read, create, update, delete: if isOwner(uid);
+    }
+
+    match /users/{uid}/progress/{itemId} {
+      allow read, create, update, delete: if isOwner(uid);
+    }
+
+    match /users/{uid}/history/{itemId} {
+      allow read, create, update, delete: if isOwner(uid);
+    }
+
+    match /branding/main {
+      allow read: if true;
+      allow write: if isAdmin();
     }
 
     match /channels/{id} {

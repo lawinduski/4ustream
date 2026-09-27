@@ -22,6 +22,7 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import { useApp } from './AppProvider';
+import { useBranding } from './BrandingProvider';
 
 export function Header() {
   const {
@@ -35,6 +36,7 @@ export function Header() {
     setLang,
     isVip,
   } = useApp();
+  const branding = useBranding();
 
   const path = usePathname();
   const [open, setOpen] = useState(false);
@@ -60,8 +62,8 @@ export function Header() {
             >
               <div className="h-11 w-11 sm:h-14 sm:w-14 shrink-0 overflow-hidden rounded-2xl bg-black/20 border border-white/10 grid place-items-center">
                 <img
-                  src="/IMG_6501.jpeg"
-                  alt="4uStream"
+                  src={branding.logoUrl || '/IMG_6501.jpeg'}
+                  alt={branding.siteName}
                   className="h-full w-full object-contain"
                   loading="eager"
                   decoding="async"
@@ -70,7 +72,7 @@ export function Header() {
 
               <div className="hidden sm:block">
                 <div className="font-black tracking-tight text-[15px]">
-                  4uStream
+                  {branding.siteName}
                 </div>
                 <div className="text-[9px] text-slate-500 tracking-[.2em] uppercase">
                   Badini • Stream

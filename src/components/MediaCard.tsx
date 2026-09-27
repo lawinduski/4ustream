@@ -1,8 +1,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Play, Star, LockKeyhole } from 'lucide-react';
+import { Play, Star, LockKeyhole, Clock3 } from 'lucide-react';
 import type { MediaItem } from '@/lib/types';
+import { formatRuntime } from '@/lib/media-meta';
 import { useFavorites } from './FavoritesProvider';
 
 export function MediaCard({ item }: { item: MediaItem }) {
@@ -42,7 +43,7 @@ export function MediaCard({ item }: { item: MediaItem }) {
           </div>
         </div>
         <div className="p-3 sm:p-4">
-          <div className="text-xs text-violet-300 font-semibold">{item.year} · {item.genre}</div>
+          <div className="text-xs text-violet-300 font-semibold flex flex-wrap items-center gap-2"><span>{item.year}</span>{item.rating != null && <span>★ {item.rating.toFixed(1)}</span>}{formatRuntime(item.runtimeMinutes) && <span className="inline-flex items-center gap-1"><Clock3 size={11}/>{formatRuntime(item.runtimeMinutes)}</span>}</div>
           <h3 className="font-bold mt-1 truncate">{item.title}</h3>
           <p className="text-xs text-slate-400 mt-2 line-clamp-2">{item.description}</p>
         </div>

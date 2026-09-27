@@ -2,9 +2,10 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { LogOut, UserRound, Download, Star, Radio, Film, PlayCircle, Crown, ShieldCheck, Sparkles } from 'lucide-react';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { LogOut, UserRound, Download, Star, Radio, Film, PlayCircle, Crown, ShieldCheck, Sparkles, MailCheck } from 'lucide-react';
+import { reload, signOut } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 import { PageShell } from '@/components/PageShell';
 import { useApp } from '@/components/AppProvider';
 import { getFavorites } from '@/lib/favorites';
@@ -12,10 +13,11 @@ import type { Favorite } from '@/lib/types';
 import { formatVipUntil } from '@/lib/access';
 
 export default function Account(){
- const {user,profile,t,install,isVip}=useApp(); const router=useRouter(); const [favorites,setFavorites]=useState<Favorite[]>([]); const [recent,setRecent]=useState<any[]>([]);
+ const {user,profile,t,install,isVip,refreshProfile}=useApp(); const [error,setError]=useState(''); const router=useRouter(); const [favorites,setFavorites]=useState<Favorite[]>([]); const [recent,setRecent]=useState<any[]>([]);
  useEffect(()=>{if(!user){setFavorites([]);return;} getFavorites(user.uid).then(setFavorites).catch(()=>setFavorites([])); const fn=()=>getFavorites(user.uid).then(setFavorites).catch(()=>{}); window.addEventListener('4u-favorites-changed',fn); return()=>window.removeEventListener('4u-favorites-changed',fn)},[user]);
  useEffect(()=>{const load=()=>{try{const x=JSON.parse(localStorage.getItem('4u-recent-watching')||'[]');setRecent(Array.isArray(x)?x.slice(0,6):[])}catch{setRecent([])}};load();window.addEventListener('4u-recent-watching-changed',load);return()=>window.removeEventListener('4u-recent-watching-changed',load)},[]);
  if(!user)return <PageShell><div className="max-w-xl mx-auto glass rounded-3xl p-8 text-center"><UserRound className="mx-auto text-violet-300" size={38}/><h1 className="text-2xl font-bold mt-4">{t('login')}</h1><button onClick={()=>router.push('/login')} className="mt-5 px-5 py-3 rounded-xl bg-white text-slate-950 font-bold">{t('login')}</button></div></PageShell>;
+ if (user && !user.emailVerified) return <PageShell><div className="max-w-xl mx-auto glass rounded-3xl p-8 text-center"><MailCheck className="mx-auto text-cyan-300" size={48}/><h1 className="text-2xl font-black mt-5">Verify your email</h1><p className="text-slate-400 mt-3 leading-6">We sent a verification email to <strong className="text-white">{user.email}</strong>. Verify it, then come back and check your account.</p><div className="flex flex-wrap justify-center gap-3 mt-6"><button onClick={async()=>{if(!auth.currentUser)return;await reload(auth.currentUser);if(auth.currentUser.emailVerified){await updateDoc(doc(db,'users',auth.currentUser.uid),{status:'active'});await refreshProfile();}else{setError('Email is not verified yet.')}}} className="px-5 py-3 rounded-xl bg-white text-slate-950 font-bold">I verified my email</button><button onClick={async()=>{if(!auth.currentUser?.email)return;const r=await fetch('/api/send-verification',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:auth.currentUser.email})});setError(r.ok?'A new verification email has been sent.':'Could not send the verification email.')}} className="px-5 py-3 rounded-xl bg-white/5 border border-white/10 font-bold">Resend email</button></div>{error&&<p className="text-sm text-red-300 mt-4">{error}</p>}<button onClick={async()=>{await signOut(auth);router.push('/login')}} className="mt-5 text-sm text-slate-500 hover:text-white">Sign out</button></div></PageShell>;
  return <PageShell><div className="max-w-4xl mx-auto space-y-6">
    <div className={`glass rounded-3xl p-7 sm:p-10 ${isVip?'account-vip':''}`}>
      <div className="flex items-start justify-between gap-4 flex-wrap">
@@ -32,7 +34,7 @@ export default function Account(){
        </ul>
      </div>:<div className="mt-7 p-5 rounded-2xl bg-white/5 border border-white/10">
        <div className="font-bold text-sm">FREE plan</div>
-       <p className="text-xs text-slate-500 mt-1.5">You have access to all free content. VIP unlocks premium channels, films and dramas — ask an admin to activate it for your account.</p>
+       <p className="text-xs text-slate-500 mt-1.5">You have access to all free content. VIP unlocks premium channels, films and dramas. You can upgrade your plan when VIP payment is available.</p>
      </div>}
      <div className="flex flex-wrap gap-3 mt-7"><button onClick={install} className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-white/5 border border-white/10"><Download size={17}/>{t('install')}</button><button onClick={async()=>{await signOut(auth);router.push('/');}} className="inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-red-500/10 border border-red-400/20 text-red-200"><LogOut size={17}/>{t('logout')}</button></div>
    </div>

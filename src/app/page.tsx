@@ -27,7 +27,7 @@ export default function Home() {
 
   useEffect(() => {
     let mounted = true;
-    Promise.all([getChannels(true, isVip), getMedia(true, isVip), getAds(true)])
+    Promise.all([getChannels(true, isVip, 60), getMedia(true, isVip, 80), getAds(true)])
       .then(([cs, ms, as]) => {
         if (!mounted) return;
         setChannels(cs);

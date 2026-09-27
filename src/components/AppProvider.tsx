@@ -23,7 +23,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const setLang=(l:Lang)=>setLangState(l); const setTheme=(t:Theme)=>setThemeState(t); const t=(key:keyof typeof translations.en)=>translations[lang][key] ?? translations.en[key];
   const install=async()=>{ if(deferred){ deferred.prompt(); await deferred.userChoice; setDeferred(null); } else alert(t('install')); };
   const vip=checkVip(profile);
-  const value=useMemo(()=>({user,profile,loading,lang,setLang,theme,setTheme,t,install,canWatch:!!user&&profile?.status==='active',isVip:vip,refreshProfile}),[user,profile,loading,lang,theme,vip]);
+  const value=useMemo(()=>({user,profile,loading,lang,setLang,theme,setTheme,t,install,canWatch:!!user&&user.emailVerified&&profile?.status==='active',isVip:vip,refreshProfile}),[user,profile,loading,lang,theme,vip]);
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 }
 export function useApp(){ const c=useContext(AppContext); if(!c) throw new Error('AppProvider missing'); return c; }
