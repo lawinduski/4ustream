@@ -108,6 +108,8 @@ export function StreamPlayer({
 
     const setup = async () => {
       if (cancelled) return;
+      if (!activeSource) return;
+      
       if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = activeSource;
         return;
