@@ -7,7 +7,9 @@ import { FavoritesProvider } from './FavoritesProvider';
 export function AppRoot({ children }: { children: React.ReactNode }) {
   return (
     <AppProvider>
-      <FavoritesProvider>{children}</FavoritesProvider>
+      <BrandingProvider>
+        <FavoritesProvider>{children}</FavoritesProvider>
+      </BrandingProvider>
     </AppProvider>
   );
 }

@@ -67,7 +67,10 @@ export default function Login() {
       } else {
         const response = await fetch('/api/send-verification', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${await credential.user.getIdToken()}`,
+          },
           body: JSON.stringify({ email: credential.user.email }),
         });
         if (!response.ok) throw new Error('Verification email failed.');

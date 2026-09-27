@@ -1,4 +1,4 @@
-const CACHE = '4ustream-shell-v2026.09.20-1';
+const CACHE = '4ustream-shell-v2026.09.28-1';
 const OFFLINE = ['/manifest.webmanifest'];
 
 self.addEventListener('install', (event) => {

@@ -250,3 +250,13 @@ button,input { font:inherit; }
 .light .admin-modal-body input,.light .admin-modal-body select,.light .admin-modal-body textarea{background:#f8fafc;color:#0f172a;border-color:rgba(15,23,42,.1)}
 .light .admin-modal-body select option{background:#fff;color:#0f172a}
 @media(max-width:700px){.admin-section-toolbar{align-items:stretch;flex-direction:column}.admin-primary-btn{width:100%}.admin-filter-panel{align-items:stretch;flex-direction:column}.admin-filter-panel>.block{min-width:0;width:100%}.admin-filter-row{width:100%}.admin-filter{flex:1;justify-content:center}.admin-content-row{padding:11px 10px;gap:8px}.admin-thumb{width:46px;height:46px;flex-basis:46px;border-radius:12px}.admin-content-row .access-chip{margin-inline-start:auto}.admin-content-row .icon-btn{width:34px;height:34px}.admin-modal-backdrop{padding:0;align-items:flex-end}.admin-modal{width:100%;max-height:94vh;border-radius:24px 24px 0 0}.admin-modal-body{padding:16px}.admin-modal-head{padding:16px}}
+
+/* Content Studio navigation */
+.studio-tabs{display:flex;gap:6px;overflow-x:auto;padding:4px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.025);border-radius:16px;scrollbar-width:none}
+.studio-tabs::-webkit-scrollbar{display:none}
+.studio-tabs button{flex:0 0 auto;padding:9px 12px;border-radius:11px;color:#8190a7;font-size:10px;font-weight:900;transition:.16s ease}
+.studio-tabs button:hover{color:#e2e8f0;background:rgba(255,255,255,.04)}
+.studio-tabs button.active{color:#fff;background:linear-gradient(135deg,rgba(139,92,246,.28),rgba(99,102,241,.18));border:1px solid rgba(167,139,250,.2)}
+.light .studio-tabs{background:rgba(15,23,42,.025);border-color:rgba(15,23,42,.08)}
+.light .studio-tabs button{color:#64748b}
+.light .studio-tabs button.active{color:#4c1d95;background:rgba(124,58,237,.08);border-color:rgba(124,58,237,.16)}

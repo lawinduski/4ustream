@@ -69,6 +69,7 @@ export default function Signup() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            Authorization: `Bearer ${await c.user.getIdToken()}`,
           },
           body: JSON.stringify({
             email: c.user.email,

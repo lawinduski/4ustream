@@ -68,10 +68,10 @@ export function StreamPlayer({
     return () => {
       try { navigator.mediaSession.metadata = null; } catch {}
     };
-  }, [url, title, playerType, live, logoUrl]);
+  }, [activeSource, activeType, title, live, logoUrl]);
 
   useEffect(() => {
-    if (!url || (playerType !== 'video' && playerType !== 'hls') || !videoRef.current) return;
+    if (!activeSource || (activeType !== 'video' && activeType !== 'hls') || !videoRef.current) return;
 
     let cancelled = false;
     const video = videoRef.current;
@@ -200,7 +200,7 @@ export function StreamPlayer({
     const hls = hlsRef.current;
     if (!hls) return;
     const index = hls.levels.findIndex((level: { height?: number }) => level.height === height);
-    if (index >= 0) { hls.currentLevel = index; setQuality(index); }
+    if (index >= 0) { hls.currentLevel = index; setQuality(qualities.indexOf(height)); }
     setShowQuality(false);
   };
 

@@ -129,6 +129,13 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    match /auditLogs/{id} {
+      allow read: if isAdmin();
+      allow create: if isAdmin()
+        && request.resource.data.adminUid == request.auth.uid;
+      allow update, delete: if false;
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

@@ -2,15 +2,23 @@ import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
 import { adminAuth } from '@/lib/firebase-admin';
 
-const CUSTOM_ACTION_URL = 'https://4ustream.vercel.app/auth-action';
+const CUSTOM_ACTION_URL = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://4ustream.vercel.app'}/auth-action`;
 
 export async function POST(request: Request) {
   try {
     const { email } = await request.json();
+    const authorization = request.headers.get('authorization') || '';
+    const token = authorization.startsWith('Bearer ') ? authorization.slice(7) : '';
 
-    if (!email || typeof email !== 'string') {
+    if (!token) {
+      return NextResponse.json({ error: 'Authentication required.' }, { status: 401 });
+    }
+
+    const decoded = await adminAuth.verifyIdToken(token);
+
+    if (!email || typeof email !== 'string' || !decoded.email || decoded.email.toLowerCase() !== email.trim().toLowerCase()) {
       return NextResponse.json(
-        { error: 'Email is required.' },
+        { error: 'Authenticated email is required.' },
         { status: 400 },
       );
     }

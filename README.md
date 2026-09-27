@@ -47,3 +47,9 @@ Set the same environment variables in Vercel, deploy the repository, and publish
 - Free/VIP controls remain managed in Firestore.
 - Deploy `storage.rules` together with `firestore.rules`.
 - Use only content and streams you own or are authorized to redistribute.
+
+## Professional upgrade (September 2026)
+
+The current source includes the Content Studio, global branding provider, VTT subtitle upload, admin audit log, admin account status controls, App Check support, protected verification-email endpoint, and the fixed multi-server video/HLS switcher. See `UPGRADE-2026-09-28.md` for the deployment checklist.
+
+Before production deployment, install dependencies and run `npm run build` locally or let Vercel build the repository. This working package was statically checked here, but dependency installation was unavailable in the execution environment, so a local/Vercel production build should be treated as the final build verification.

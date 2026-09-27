@@ -11,9 +11,10 @@ export type CastMember = { name: string; character?: string; photo?: string; ord
 export type Channel = { id: string; name: string; category: Category; description?: string; logo?: string; streamUrl?: string; playerType?: PlayerType; enabled: boolean; accessLevel?: AccessLevel };
 
 export type MediaItem = {
-  id: string; title: string; type: 'film' | 'drama'; year: number; genre: string; description: string; poster: string;
+  id: string; title: string; slug?: string; type: 'film' | 'drama'; year: number; genre: string; description: string; poster: string;
   streamUrl?: string; playerType?: PlayerType; enabled?: boolean; accessLevel?: AccessLevel;
   backdrop?: string; logo?: string; trailerUrl?: string; trailerPlayerType?: PlayerType;
+  seoTitle?: string; seoDescription?: string; keywords?: string[]; ageRating?: string; imdbId?: string;
   rating?: number; ratingCount?: number; runtimeMinutes?: number; country?: string; originalLanguage?: string;
   quality?: string[]; tags?: string[]; genres?: string[]; status?: 'released' | 'ongoing' | 'upcoming' | 'completed';
   cast?: CastMember[]; director?: string; images?: MediaImage[]; subtitles?: SubtitleTrack[]; servers?: MediaServer[];

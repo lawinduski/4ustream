@@ -9,7 +9,17 @@ service firebase.storage {
 
     match /public-assets/{allPaths=**} {
       allow read: if true;
-      allow write: if isAdmin();
+      allow write: if isAdmin()
+        && request.resource.size < 8 * 1024 * 1024
+        && request.resource.contentType in ['image/png', 'image/jpeg', 'image/webp', 'image/gif', 'image/svg+xml'];
+      allow delete: if isAdmin();
+    }
+
+    match /public-assets/subtitles/{allPaths=**} {
+      allow read: if true;
+      allow write: if isAdmin()
+        && request.resource.size < 2 * 1024 * 1024
+        && request.resource.contentType == 'text/vtt';
       allow delete: if isAdmin();
     }
 
