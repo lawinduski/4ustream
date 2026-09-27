@@ -44,42 +44,52 @@ export default function Signup() {
       const c =
         await createUserWithEmailAndPassword(
           auth,
-          email,
+          email.trim(),
           password,
         );
 
       await updateProfile(c.user, {
-        displayName: name,
+        displayName: name.trim(),
       });
 
-      const verificationResponse = await fetch(
-        '/api/send-verification',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: c.user.email,
-          }),
-        },
-      );
-
-if (!verificationResponse.ok) {
-  throw new Error(
-    'Could not send verification email.',
-  );
-}
       await setDoc(
         doc(db, 'users', c.user.uid),
         {
           uid: c.user.uid,
-          name,
-          email,
-          status: 'active',
+          name: name.trim(),
+          email: c.user.email || email.trim(),
+          status: 'unverified',
+          plan: 'free',
+          vipUntil: null,
           createdAt: serverTimestamp(),
         },
       );
+
+      try {
+        const verificationResponse = await fetch(
+          '/api/send-verification',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: c.user.email || email.trim(),
+            }),
+          },
+        );
+
+        if (!verificationResponse.ok) {
+          console.error(
+            '4uStream verification email failed.',
+          );
+        }
+      } catch (verificationError) {
+        console.error(
+          '4uStream verification email error:',
+          verificationError,
+        );
+      }
 
       router.push('/account');
     } catch (err: any) {
@@ -105,7 +115,7 @@ if (!verificationResponse.ok) {
         </h1>
 
         <p className="text-slate-400 mt-1">
-          Your account is ready immediately. VIP access can be managed by the administrator.
+          Verify your email to activate your 4uStream account.
         </p>
 
         <form
@@ -172,7 +182,8 @@ if (!verificationResponse.ok) {
             className="text-violet-300"
             href="/login"
           >
-            Sign in</Link>
+            Sign in
+          </Link>
         </p>
       </div>
     </PageShell>
