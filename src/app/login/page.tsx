@@ -1,5 +1,4 @@
 'use client';
-
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FormEvent, useState } from 'react';
@@ -12,82 +11,83 @@ import { doc, updateDoc } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 import { PageShell } from '@/components/PageShell';
 import { LogIn, Loader2, MailCheck } from 'lucide-react';
-
 export default function Login() {
   const router = useRouter();
-
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   const [busy, setBusy] = useState(false);
   const [resending, setResending] = useState(false);
-
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
-
   const submit = async (e: FormEvent) => {
     e.preventDefault();
-
     setBusy(true);
     setError('');
     setNotice('');
-
     try {
       const credential = await signInWithEmailAndPassword(
         auth,
         email.trim(),
         password
       );
-
       await reload(credential.user);
-
+      /*
+       * User must verify the email before entering
+       * the main 4uStream application.
+       */
       if (!credential.user.emailVerified) {
         setError(
           'Please verify your email before continuing.'
         );
-
         setBusy(false);
         return;
       }
-
+      /*
+       * Refresh the ID token so Firestore Rules
+       * receive the latest email_verified=true claim.
+       */
+      await credential.user.getIdToken(true);
+      /*
+       * Once the Firebase email is verified,
+       * activate the corresponding profile.
+       */
       const profileRef = doc(
         db,
         'users',
         credential.user.uid
       );
-
       await updateDoc(profileRef, {
         status: 'active',
       });
-
       router.push('/');
     } catch (error: unknown) {
-      console.error('4uStream login error:', error);
-
+      console.error(
+        '4uStream login error:',
+        error
+      );
+      /*
+       * Keep the normal login message generic.
+       */
       setError(
         'Email or password is incorrect.'
       );
-
       setBusy(false);
     }
   };
-
   const resendVerification = async () => {
     if (!email.trim() || !password) {
       setError(
         'Enter your email and password first.'
       );
+      setNotice('');
       return;
     }
-
     setResending(true);
     setError('');
     setNotice('');
-
     try {
       /*
-       * Sign in first so Firebase gives us
-       * a valid authenticated user/token.
+       * Authenticate the user first.
        */
       const credential =
         await signInWithEmailAndPassword(
@@ -95,69 +95,75 @@ export default function Login() {
           email.trim(),
           password
         );
-
       /*
-       * Refresh Firebase user information.
+       * Reload the Firebase user so emailVerified
+       * contains the latest server-side value.
        */
       await reload(credential.user);
-
       /*
-       * If the email is already verified,
-       * simply activate the existing account.
+       * If the email has already been verified,
+       * activate the Firestore profile.
        */
       if (credential.user.emailVerified) {
-        await updateDoc(
-          doc(
-            db,
-            'users',
-            credential.user.uid
-          ),
-          {
-            status: 'active',
-          }
-        );
-
+        /*
+         * Force-refresh the Firebase ID token.
+         * This is important because Firestore Rules
+         * use request.auth.token.email_verified.
+         */
+        await credential.user.getIdToken(true);
+        try {
+          await updateDoc(
+            doc(
+              db,
+              'users',
+              credential.user.uid
+            ),
+            {
+              status: 'active',
+            }
+          );
+        } catch (error: unknown) {
+          console.error(
+            '4uStream profile activation error:',
+            error
+          );
+          throw new Error(
+            'Your email is verified, but your account profile could not be activated. Please try signing in again.'
+          );
+        }
         setNotice(
           'Your email is already verified. You can sign in now.'
         );
-
         return;
       }
-
       /*
-       * Force-refresh the ID token before
-       * sending it to our server.
+       * User is still unverified.
+       *
+       * Get a fresh Firebase ID token and send it
+       * to the secure server-side verification endpoint.
        */
       const token =
         await credential.user.getIdToken(true);
-
-      /*
-       * Ask our server to generate and send
-       * the custom 4uStream verification email.
-       */
       const response = await fetch(
         '/api/send-verification',
         {
           method: 'POST',
-
           headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
           },
-
           body: JSON.stringify({
             email: credential.user.email,
           }),
         }
       );
-
       /*
-       * Read the server response even when it
-       * is an error, so we know the real reason.
+       * Read the server response even when it fails.
+       * This lets us see the actual server-side reason
+       * instead of always showing a generic error.
        */
       const data =
         await response.json().catch(() => null);
-
       if (!response.ok) {
         throw new Error(
           data?.details ||
@@ -165,7 +171,6 @@ export default function Login() {
             `Verification email failed (${response.status}).`
         );
       }
-
       setNotice(
         'A new verification email has been sent.'
       );
@@ -174,39 +179,31 @@ export default function Login() {
         '4uStream resend verification error:',
         error
       );
-
       /*
-       * Show the actual safe error instead of
-       * hiding every possible problem behind
-       * "Check your email and password."
+       * Show the useful error returned by Firebase/API.
        */
       const message =
         error instanceof Error
           ? error.message
           : 'Could not resend the verification email.';
-
       setError(message);
     } finally {
       setResending(false);
     }
   };
-
   const resetPassword = async () => {
     if (!email.trim()) {
       setError('Enter your email first.');
       setNotice('');
       return;
     }
-
     setError('');
     setNotice('');
-
     try {
       await sendPasswordResetEmail(
         auth,
         email.trim()
       );
-
       setNotice(
         'Password reset email sent.'
       );
@@ -215,28 +212,23 @@ export default function Login() {
         '4uStream password reset error:',
         error
       );
-
       setError(
         'Could not send the password reset email.'
       );
     }
   };
-
   return (
     <PageShell>
       <div className="max-w-md mx-auto glass rounded-3xl p-7 sm:p-9">
         <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-violet-500 to-cyan-400 grid place-items-center">
           <LogIn />
         </div>
-
         <h1 className="text-3xl font-black mt-6">
           Welcome back
         </h1>
-
         <p className="text-slate-400 mt-1">
           Sign in to continue to 4uStream.
         </p>
-
         <form
           onSubmit={submit}
           className="mt-7 space-y-4"
@@ -251,7 +243,6 @@ export default function Login() {
             placeholder="Email"
             className="w-full glass rounded-xl px-4 py-3 outline-none"
           />
-
           <input
             required
             type="password"
@@ -262,19 +253,16 @@ export default function Login() {
             placeholder="Password"
             className="w-full glass rounded-xl px-4 py-3 outline-none"
           />
-
           {error && (
             <div className="text-sm text-red-300 break-words">
               {error}
             </div>
           )}
-
           {notice && (
             <div className="text-sm text-emerald-300 break-words">
               {notice}
             </div>
           )}
-
           <button
             type="submit"
             disabled={busy || resending}
@@ -286,11 +274,9 @@ export default function Login() {
                 size={17}
               />
             )}
-
             Sign in
           </button>
         </form>
-
         <div className="mt-4 flex flex-wrap items-center gap-4 text-xs">
           <button
             type="button"
@@ -306,10 +292,8 @@ export default function Login() {
             ) : (
               <MailCheck size={13} />
             )}
-
             Resend verification
           </button>
-
           <button
             type="button"
             onClick={resetPassword}
@@ -319,7 +303,6 @@ export default function Login() {
             Forgot password?
           </button>
         </div>
-
         <p className="text-sm text-slate-500 mt-6">
           New here?{' '}
           <Link
