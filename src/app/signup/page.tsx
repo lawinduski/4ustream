@@ -52,24 +52,12 @@ export default function Signup() {
         displayName: name,
       });
 
-      await setDoc(
-        doc(db, 'users', c.user.uid),
-        {
-          uid: c.user.uid,
-          name,
-          email,
-          status: 'unverified',
-          createdAt: serverTimestamp(),
-        },
-      );
-
       const verificationResponse = await fetch(
         '/api/send-verification',
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${await c.user.getIdToken()}`,
           },
           body: JSON.stringify({
             email: c.user.email,
@@ -77,9 +65,21 @@ export default function Signup() {
         },
       );
 
-      if (!verificationResponse.ok) {
-        throw new Error('Could not send verification email.');
-      }
+if (!verificationResponse.ok) {
+  throw new Error(
+    'Could not send verification email.',
+  );
+}
+      await setDoc(
+        doc(db, 'users', c.user.uid),
+        {
+          uid: c.user.uid,
+          name,
+          email,
+          status: 'active',
+          createdAt: serverTimestamp(),
+        },
+      );
 
       router.push('/account');
     } catch (err: any) {
@@ -105,7 +105,7 @@ export default function Signup() {
         </h1>
 
         <p className="text-slate-400 mt-1">
-          Verify your email to activate your 4uStream account.
+          Your account is ready immediately. VIP access can be managed by the administrator.
         </p>
 
         <form
