@@ -1,85 +1,161 @@
-import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
-import { adminAuth } from '@/lib/firebase-admin';
+'use client';
 
-const CUSTOM_ACTION_URL = 'https://4ustream.vercel.app/auth-action';
+import { useEffect, useState } from 'react';
+import Link from 'next/link';
+import {
+  applyActionCode,
+  reload,
+} from 'firebase/auth';
+import {
+  CheckCircle2,
+  Loader2,
+  XCircle,
+} from 'lucide-react';
 
-export async function POST(request: Request) {
-  try {
-    const { email } = await request.json();
+import { auth, db } from '@/lib/firebase';
+import {
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
 
-    if (!email || typeof email !== 'string') {
-      return NextResponse.json(
-        { error: 'Email is required.' },
-        { status: 400 },
-      );
-    }
+export default function AuthActionPage() {
+  const [status, setStatus] = useState<
+    'loading' | 'success' | 'error'
+  >('loading');
 
-    const firebaseLink =
-      await adminAuth.generateEmailVerificationLink(email, {
-        url: CUSTOM_ACTION_URL,
-        handleCodeInApp: true,
-      });
+  useEffect(() => {
+    const verifyEmail = async () => {
+      try {
+        const params = new URLSearchParams(
+          window.location.search,
+        );
 
-    const generatedUrl = new URL(firebaseLink);
-    const mode =
-      generatedUrl.searchParams.get('mode') || 'verifyEmail';
-    const oobCode = generatedUrl.searchParams.get('oobCode');
+        const mode = params.get('mode');
+        const oobCode = params.get('oobCode');
 
-    if (!oobCode) {
-      throw new Error('Firebase did not return a verification code.');
-    }
+        if (
+          mode !== 'verifyEmail' ||
+          !oobCode
+        ) {
+          throw new Error(
+            'Invalid verification link.',
+          );
+        }
 
-    const verificationLink = new URL(CUSTOM_ACTION_URL);
-    verificationLink.searchParams.set('mode', mode);
-    verificationLink.searchParams.set('oobCode', oobCode);
+        await applyActionCode(
+          auth,
+          oobCode,
+        );
 
-    const smtpUser = process.env.SMTP_USER;
-    const smtpPass = process.env.SMTP_PASS;
+        if (auth.currentUser) {
+          try {
+            await reload(auth.currentUser);
 
-    if (!smtpUser || !smtpPass) {
-      throw new Error('SMTP environment variables are missing.');
-    }
+            await auth.currentUser.getIdToken(
+              true,
+            );
 
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: Number(process.env.SMTP_PORT || 465),
-      secure: true,
-      auth: {
-        user: smtpUser,
-        pass: smtpPass,
-      },
-    });
+            const profileRef = doc(
+              db,
+              'users',
+              auth.currentUser.uid,
+            );
 
-    await transporter.sendMail({
-      from: {
-        name: '4uStream',
-        address: smtpUser,
-      },
-      to: email,
-      subject: 'Verify your 4uStream email',
-      text:
-        'Welcome to 4uStream. Verify your email here: ' +
-        verificationLink.toString(),
-      html:
-        '<!doctype html><html><body style="margin:0;background:#070b14;color:#fff;font-family:Arial,sans-serif;padding:32px">' +
-        '<div style="max-width:560px;margin:auto;background:#111827;border:1px solid #263246;border-radius:24px;padding:36px;text-align:center">' +
-        '<h1 style="margin:0 0 12px;font-size:32px">4uStream</h1>' +
-        '<p style="color:#aab4c4;font-size:16px;line-height:1.6">Welcome! Please verify your email address to activate your 4uStream account.</p>' +
-        '<a href="' +
-        verificationLink.toString() +
-        '" style="display:inline-block;margin-top:20px;background:#fff;color:#0b1220;text-decoration:none;font-weight:700;padding:14px 24px;border-radius:14px">Verify Email</a>' +
-        '<p style="margin-top:28px;color:#778398;font-size:12px">If you did not create this account, you can ignore this email.</p>' +
-        '</div></body></html>',
-    });
+            await updateDoc(profileRef, {
+              status: 'active',
+            });
+          } catch (profileError) {
+            console.error(
+              '4uStream profile activation error:',
+              profileError,
+            );
+          }
+        }
 
-    return NextResponse.json({ success: true });
-  } catch (error) {
-    console.error('4uStream verification email error:', error);
+        setStatus('success');
+      } catch (error) {
+        console.error(
+          '4uStream email verification error:',
+          error,
+        );
 
-    return NextResponse.json(
-      { error: 'Could not send verification email.' },
-      { status: 500 },
-    );
-  }
+        setStatus('error');
+      }
+    };
+
+    verifyEmail();
+  }, []);
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-slate-950 px-5 text-white">
+      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.06] p-8 text-center shadow-2xl backdrop-blur-xl">
+
+        {status === 'loading' && (
+          <>
+            <Loader2
+              className="mx-auto mb-5 animate-spin"
+              size={48}
+            />
+
+            <h1 className="text-2xl font-black">
+              Verifying your email...
+            </h1>
+
+            <p className="mt-3 text-sm text-white/60">
+              Please wait a moment.
+            </p>
+          </>
+        )}
+
+        {status === 'success' && (
+          <>
+            <CheckCircle2
+              className="mx-auto mb-5 text-emerald-400"
+              size={64}
+            />
+
+            <h1 className="text-3xl font-black">
+              Email Verified
+            </h1>
+
+            <p className="mt-3 text-white/60">
+              Your 4uStream account has been verified successfully.
+            </p>
+
+            <Link
+              href="/"
+              className="mt-7 inline-flex rounded-2xl bg-white px-6 py-3 font-black text-slate-950 transition hover:scale-105"
+            >
+              Continue to 4uStream
+            </Link>
+          </>
+        )}
+
+        {status === 'error' && (
+          <>
+            <XCircle
+              className="mx-auto mb-5 text-red-400"
+              size={64}
+            />
+
+            <h1 className="text-3xl font-black">
+              Verification Failed
+            </h1>
+
+            <p className="mt-3 text-white/60">
+              This verification link is invalid or has expired.
+            </p>
+
+            <Link
+              href="/"
+              className="mt-7 inline-flex rounded-2xl bg-white px-6 py-3 font-black text-slate-950"
+            >
+              Back to 4uStream
+            </Link>
+          </>
+        )}
+
+      </div>
+    </main>
+  );
 }
