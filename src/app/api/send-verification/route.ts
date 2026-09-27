@@ -26,21 +26,41 @@ export async function POST(request: Request) {
     const firebaseLink =
       await adminAuth.generateEmailVerificationLink(email, {
         url: CUSTOM_ACTION_URL,
-        handleCodeInApp: true,
+        handleCodeInApp: false,
       });
 
     const generatedUrl = new URL(firebaseLink);
+
     const mode =
       generatedUrl.searchParams.get('mode') || 'verifyEmail';
-    const oobCode = generatedUrl.searchParams.get('oobCode');
 
-    if (!oobCode) {
-      throw new Error('Firebase did not return a verification code.');
+    const oobCode = generatedUrl.searchParams.get('oobCode');
+    const apiKey = generatedUrl.searchParams.get('apiKey');
+    const continueUrl = generatedUrl.searchParams.get('continueUrl');
+    const lang = generatedUrl.searchParams.get('lang');
+
+    if (!oobCode || !apiKey) {
+      throw new Error(
+        'Firebase did not return a complete verification action link.'
+      );
     }
 
     const verificationLink = new URL(CUSTOM_ACTION_URL);
+
     verificationLink.searchParams.set('mode', mode);
     verificationLink.searchParams.set('oobCode', oobCode);
+    verificationLink.searchParams.set('apiKey', apiKey);
+
+    if (continueUrl) {
+      verificationLink.searchParams.set(
+        'continueUrl',
+        continueUrl
+      );
+    }
+
+    if (lang) {
+      verificationLink.searchParams.set('lang', lang);
+    }
 
     const smtpUser = process.env.SMTP_USER;
     const smtpPass = process.env.SMTP_PASS;
