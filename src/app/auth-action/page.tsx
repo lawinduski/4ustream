@@ -1,11 +1,22 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import  Link  from 'next/link';
-import { applyActionCode } from 'firebase/auth';
-import { CheckCircle2, Loader2, XCircle } from 'lucide-react';
+import Link from 'next/link';
+import {
+  applyActionCode,
+  reload,
+} from 'firebase/auth';
+import {
+  CheckCircle2,
+  Loader2,
+  XCircle,
+} from 'lucide-react';
 
-import { auth } from '@/lib/firebase';
+import { auth, db } from '@/lib/firebase';
+import {
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
 
 export default function AuthActionPage() {
   const [status, setStatus] = useState<
@@ -22,11 +33,44 @@ export default function AuthActionPage() {
         const mode = params.get('mode');
         const oobCode = params.get('oobCode');
 
-        if (mode !== 'verifyEmail' || !oobCode) {
-          throw new Error('Invalid verification link.');
+        if (
+          mode !== 'verifyEmail' ||
+          !oobCode
+        ) {
+          throw new Error(
+            'Invalid verification link.',
+          );
         }
 
-        await applyActionCode(auth, oobCode);
+        await applyActionCode(
+          auth,
+          oobCode,
+        );
+
+        if (auth.currentUser) {
+          try {
+            await reload(auth.currentUser);
+
+            await auth.currentUser.getIdToken(
+              true,
+            );
+
+            const profileRef = doc(
+              db,
+              'users',
+              auth.currentUser.uid,
+            );
+
+            await updateDoc(profileRef, {
+              status: 'active',
+            });
+          } catch (profileError) {
+            console.error(
+              '4uStream profile activation error:',
+              profileError,
+            );
+          }
+        }
 
         setStatus('success');
       } catch (error) {
